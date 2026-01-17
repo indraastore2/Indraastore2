@@ -654,15 +654,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// FITUR BACKSONG YOUTUBE
+// FITUR BACKSONG YOUTUBE DENGAN MUTE/UNMUTE
 // ==========================================
 
 var player;
+var isMuted = false;
+
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('youtube-player', {
         height: '0',
         width: '0',
-        videoId: 'vnoHcTMY55k', // ID dari link yang Anda berikan
+        videoId: 'vnoHcTMY55k',
         playerVars: {
             'autoplay': 1,
             'loop': 1,
@@ -675,16 +677,35 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-    // Mencoba memutar otomatis
+    // Mulai putar video
     event.target.playVideo();
     
-    // Karena kebijakan Autoplay browser, kita putar saat ada klik pertama di halaman
+    const musicBtn = document.getElementById('music-control');
+    const musicIcon = document.getElementById('music-icon');
+
+    // Fungsi Toggle Mute
+    musicBtn.addEventListener('click', function() {
+        if (isMuted) {
+            player.unMute();
+            player.playVideo(); // Pastikan jalan jika sebelumnya terhenti
+            musicIcon.innerText = "🔊";
+            isMuted = false;
+        } else {
+            player.mute();
+            musicIcon.innerText = "×";
+            isMuted = true;
+        }
+    });
+
+    // Autoplay Fix: Putar saat ada interaksi pertama user di halaman
     document.addEventListener('click', function() {
-        player.playVideo();
+        if (!isMuted) {
+            player.playVideo();
+        }
     }, { once: true });
 }
 
-// Load YouTube API script secara asinkron
+// Load YouTube API script
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];

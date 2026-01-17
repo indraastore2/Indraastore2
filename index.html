@@ -141,12 +141,11 @@
     <source src="https://www.chosic.com/wp-content/uploads/2021/07/The-Epic-Hero-Epic-Cinematic-Music.mp3" type="audio/mpeg">
 </audio>
 
-<div id="youtube-player" style="display: none;"></div>
-
-<div id="music-control" class="music-btn">
-    <span id="music-icon">🔈</span>
-    <span id="music-text">Play Music</span>
+<div id="music-control" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 50%; cursor: pointer; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary);">
+    <span id="music-icon" style="font-size: 24px;">🔊</span>
 </div>
+
+<div id="youtube-player" style="display: none;"></div>
 
     <section id="home" class="hero">
     <div class="hero-overlay"></div> <div class="hero-content">
