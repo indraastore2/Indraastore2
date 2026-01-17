@@ -462,6 +462,7 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
         display: block;
         cursor: pointer;
         z-index: 1001;
+        position: relative;
     }
 
     .menu-toggle .bar {
@@ -476,16 +477,18 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     /* Transformasi Menu menjadi Sidebar/Overlay */
     .nav-links {
         position: fixed;
-        right: -100%; /* Sembunyi di kanan */
+        right: -100%; /* Sembunyi di luar layar kanan */
         top: 0;
-        flex-direction: column;
-        background: #0f172a;
-        width: 70%;
+        width: 280px; /* Lebar menu samping */
         height: 100vh;
-        padding-top: 100px;
-        transition: 0.3s;
-        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-        align-items: flex-start !important; /* Rata kiri */
+        background: #0f172a; /* Warna gelap solid */
+        display: flex !important; /* Gunakan flex untuk menyusun list */
+        flex-direction: column;
+        padding: 100px 20px 20px 20px;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10000;
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+        border-left: 1px solid var(--primary);
     }
 
     .nav-links.active {
@@ -493,12 +496,23 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     }
 
     .nav-links li {
-        margin: 15px 30px !important;
+        margin: 15px 0 !important;
+        width: 100%;
         display: block !important; /* Munculkan kembali yang disembunyikan */
     }
 
     .nav-links a {
         font-size: 18px;
+        color: #ffffff !important; /* Pastikan teks putih */
+        display: block;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    #nav-cart {
+        margin-top: 20px !important;
+        padding: 10px;
+        justify-content: flex-start;
     }
 
     /* Animasi Tombol X saat diklik */

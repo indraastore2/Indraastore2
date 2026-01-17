@@ -631,3 +631,33 @@ document.querySelectorAll('.nav-links a').forEach(n => n.addEventListener('click
     menu.classList.remove('is-active');
     menuLinks.classList.remove('active');
 }));
+
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.querySelector('#mobile-menu');
+    const navList = document.querySelector('#nav-list');
+
+    if (menuToggle && navList) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Mencegah event bubbling
+            menuToggle.classList.toggle('is-active');
+            navList.classList.toggle('active');
+        });
+
+        // Klik di luar menu untuk menutup
+        document.addEventListener('click', (e) => {
+            if (!navList.contains(e.target) && !menuToggle.contains(e.target)) {
+                menuToggle.classList.remove('is-active');
+                navList.classList.remove('active');
+            }
+        });
+
+        // Tutup saat link diklik
+        const links = navList.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('is-active');
+                navList.classList.remove('active');
+            });
+        });
+    }
+});
