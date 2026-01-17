@@ -452,29 +452,60 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 
 #price-display {
     text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-
 }
 
 /* --- RESPONSIVE DESIGN FOR SMARTPHONES --- */
 
 @media (max-width: 768px) {
-    /* 1. Navigasi Mobile */
-    nav {
-        padding: 15px 0;
+    /* Tombol Garis Tiga */
+    .menu-toggle {
+        display: block;
+        cursor: pointer;
+        z-index: 1001;
     }
 
-    .nav-container {
-        padding: 0 20px;
+    .menu-toggle .bar {
+        display: block;
+        width: 25px;
+        height: 3px;
+        margin: 5px auto;
+        transition: all 0.3s ease-in-out;
+        background: var(--text-main);
     }
 
+    /* Transformasi Menu menjadi Sidebar/Overlay */
     .nav-links {
-        gap: 15px;
+        position: fixed;
+        right: -100%; /* Sembunyi di kanan */
+        top: 0;
+        flex-direction: column;
+        background: #0f172a;
+        width: 70%;
+        height: 100vh;
+        padding-top: 100px;
+        transition: 0.3s;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        align-items: flex-start !important; /* Rata kiri */
     }
 
-    /* Sembunyikan teks menu yang kurang penting untuk menghemat ruang */
-    .nav-links li:not(#nav-cart):not(#auth-section) {
-        display: none; 
+    .nav-links.active {
+        right: 0; /* Muncul ke layar */
     }
+
+    .nav-links li {
+        margin: 15px 30px !important;
+        display: block !important; /* Munculkan kembali yang disembunyikan */
+    }
+
+    .nav-links a {
+        font-size: 18px;
+    }
+
+    /* Animasi Tombol X saat diklik */
+    #mobile-menu.is-active .bar:nth-child(2) { opacity: 0; }
+    #mobile-menu.is-active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    #mobile-menu.is-active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
 
     .logo {
         font-size: 20px;

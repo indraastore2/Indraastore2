@@ -616,3 +616,18 @@ window.onload = () => {
 window.onclick = (e) => { 
     if(e.target.className === 'modal') e.target.style.display = 'none'; 
 };
+
+const menu = document.querySelector('#mobile-menu');
+const menuLinks = document.querySelector('#nav-list');
+
+// Klik tombol hamburger
+menu.addEventListener('click', function() {
+    menu.classList.toggle('is-active');
+    menuLinks.classList.toggle('active');
+});
+
+// Tutup menu saat salah satu link diklik
+document.querySelectorAll('.nav-links a').forEach(n => n.addEventListener('click', () => {
+    menu.classList.remove('is-active');
+    menuLinks.classList.remove('active');
+}));
