@@ -633,31 +633,34 @@ document.querySelectorAll('.nav-links a').forEach(n => n.addEventListener('click
 }));
 
 document.addEventListener('DOMContentLoaded', () => {
-    const menuToggle = document.querySelector('#mobile-menu');
-    const navList = document.querySelector('#nav-list');
+    const menuBtn = document.querySelector('#mobile-menu');
+    const navLinks = document.querySelector('.nav-links');
+    
+    // Tambahkan overlay ke body
+    const overlay = document.createElement('div');
+    overlay.className = 'nav-overlay';
+    document.body.appendChild(overlay);
 
-    if (menuToggle && navList) {
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation(); // Mencegah event bubbling
-            menuToggle.classList.toggle('is-active');
-            navList.classList.toggle('active');
-        });
-
-        // Klik di luar menu untuk menutup
-        document.addEventListener('click', (e) => {
-            if (!navList.contains(e.target) && !menuToggle.contains(e.target)) {
-                menuToggle.classList.remove('is-active');
-                navList.classList.remove('active');
-            }
-        });
-
-        // Tutup saat link diklik
-        const links = navList.querySelectorAll('a');
-        links.forEach(link => {
-            link.addEventListener('click', () => {
-                menuToggle.classList.remove('is-active');
-                navList.classList.remove('active');
-            });
-        });
+    if (menuBtn) {
+        menuBtn.onclick = () => {
+            menuBtn.classList.toggle('is-active');
+            navLinks.classList.toggle('active');
+            overlay.classList.toggle('show');
+        };
     }
+
+    overlay.onclick = () => {
+        menuBtn.classList.remove('is-active');
+        navLinks.classList.remove('active');
+        overlay.classList.remove('show');
+    };
+
+    // Otomatis tutup jika salah satu menu diklik
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            menuBtn.classList.remove('is-active');
+            navLinks.classList.remove('active');
+            overlay.classList.remove('show');
+        });
+    });
 });
