@@ -209,19 +209,29 @@ function updateCartUI() {
     let totalMurni = 0;
     let totalSetelahDiskon = 0;
 
+    // Cek apakah promo 5% masih berlaku
+    const promoExpiry = localStorage.getItem('loyalPromoExpiry');
+    const isLoyalPromoActive = promoExpiry && Date.now() < promoExpiry;
+
     cart.forEach(item => {
         totalMurni += item.val;
-        if (isDiscountActive && item.type === "Joki") {
-            totalSetelahDiskon += (item.val * 0.98); 
-        } else {
-            totalSetelahDiskon += item.val;
+        let itemPrice = item.val;
+
+        if (item.type === "Joki") {
+            if (isLoyalPromoActive) {
+                itemPrice = item.val * 0.95; // Diskon 5%
+            } else if (isDiscountActive) {
+                itemPrice = item.val * 0.98; // Diskon 2% (Flash Sale)
+            }
         }
+        totalSetelahDiskon += itemPrice;
     });
 
-    if (isDiscountActive && cart.some(i => i.type === "Joki")) {
+    if ((isLoyalPromoActive || isDiscountActive) && cart.some(i => i.type === "Joki")) {
+        const label = isLoyalPromoActive ? "Loyalitas 5%" : "Flash Sale 2%";
         totalDiv.innerHTML = `
             <div style="font-size: 0.8rem; color: var(--text-dim); text-decoration: line-through;">Harga Normal: Rp ${totalMurni.toLocaleString('id-ID')}</div>
-            <div style="color: #4ade80;">Total Akhir: Rp ${Math.floor(totalSetelahDiskon).toLocaleString('id-ID')}</div>
+            <div style="color: #4ade80;">Total Akhir (${label}): Rp ${Math.floor(totalSetelahDiskon).toLocaleString('id-ID')}</div>
         `;
     } else {
         totalDiv.innerText = "Total: Rp " + totalMurni.toLocaleString('id-ID');
@@ -249,13 +259,12 @@ function executeClearCart() {
 }
 
 function checkoutWhatsApp() {
-    if (cart.length === 0) {
-        alert("Keranjang Anda masih kosong!");
-        return;
-    }
+    if (cart.length === 0) return;
 
     const userSekarang = localStorage.getItem('userLogin') || "Guest";
     const waNomor = "62895321940805";
+    const promoExpiry = localStorage.getItem('loyalPromoExpiry');
+    const isLoyalPromoActive = promoExpiry && Date.now() < promoExpiry;
     
     let pesanWA = `*Halo Indraa Store, saya ingin order:*\n`;
     pesanWA += `--------------------------------\n`;
@@ -265,42 +274,40 @@ function checkoutWhatsApp() {
         pesanWA += `${index + 1}. *${item.name}* (${item.type}) - ${item.price}\n`;
     });
 
-    let totalMurni = 0;
     let totalSetelahDiskon = 0;
     cart.forEach(item => {
-        totalMurni += item.val;
-        if (isDiscountActive && item.type === "Joki") {
-            totalSetelahDiskon += (item.val * 0.98);
-        } else {
-            totalSetelahDiskon += item.val;
+        let itemPrice = item.val;
+        if (item.type === "Joki") {
+            if (isLoyalPromoActive) itemPrice = item.val * 0.95;
+            else if (isDiscountActive) itemPrice = item.val * 0.98;
         }
+        totalSetelahDiskon += itemPrice;
     });
 
     const totalFinal = Math.floor(totalSetelahDiskon);
     
     pesanWA += `\n--------------------------------\n`;
     pesanWA += `💰 *Total Pembayaran:* Rp ${totalFinal.toLocaleString('id-ID')}\n`;
-    if (isDiscountActive && cart.some(i => i.type === "Joki")) {
+    
+    if (isLoyalPromoActive && cart.some(i => i.type === "Joki")) {
+        pesanWA += `_(Promo Loyalitas 5% Aktif! 🎉)_\n`;
+    } else if (isDiscountActive && cart.some(i => i.type === "Joki")) {
         pesanWA += `_(Sudah termasuk potongan diskon Joki)_\n`;
     }
+    
     pesanWA += `\nMohon segera diproses ya!`;
 
-    if (userSekarang !== "Guest") {
-        database.ref('pending_orders').push({
-            userEmail: userSekarang,
-            items: cart,
-            totalPrice: totalFinal,
-            status: "Diproses",
-            createdAt: Date.now()
-        });
-    } else {
-        database.ref('guest_orders').push({
-            userEmail: "Guest (No Account)",
-            items: cart,
-            totalPrice: totalFinal,
-            createdAt: Date.now()
-        });
-    }
+    // Kirim ke database (sama seperti sebelumnya)
+    const orderData = {
+        userEmail: userSekarang,
+        items: cart,
+        totalPrice: totalFinal,
+        status: userSekarang === "ADMIN" ? "Selesai" : "Diproses",
+        createdAt: Date.now()
+    };
+
+    const refPath = userSekarang !== "Guest" ? 'pending_orders' : 'guest_orders';
+    database.ref(refPath).push(orderData);
 
     window.open(`https://wa.me/${waNomor}?text=${encodeURIComponent(pesanWA)}`, '_blank');
 }
@@ -385,8 +392,12 @@ function loadUserHistory(email) {
     database.ref('orders').orderByChild('userEmail').equalTo(email).on('value', (snapshot) => {
         if(snapshot.exists()) {
             historyList.innerHTML = "";
+            let orderCount = 0;
+            
             snapshot.forEach((child) => {
                 const order = child.val();
+                if(order.status === "Selesai") orderCount++; // Hitung pesanan selesai
+
                 const date = new Date(order.createdAt).toLocaleDateString('id-ID', {
                     day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'
                 });
@@ -399,6 +410,17 @@ function loadUserHistory(email) {
                         <div class="status-badge">Selesai</div>
                     </div>`;
             });
+
+            // LOGIKA PROMO LOYALITAS (10x Order)
+            if (orderCount >= 10) {
+                const now = Date.now();
+                const sevenDays = 7 * 24 * 60 * 60 * 1000;
+                // Set promo jika belum ada atau sudah kadaluwarsa
+                if (!localStorage.getItem('loyalPromoExpiry') || now > localStorage.getItem('loyalPromoExpiry')) {
+                    localStorage.setItem('loyalPromoExpiry', now + sevenDays);
+                    alert("🎉 Luar biasa! Anda telah menyelesaikan " + orderCount + " order. Nikmati Promo Loyalitas 5% selama 7 hari ke depan!");
+                }
+            }
         } else {
             historyList.innerHTML = `<p style="text-align:center; color:var(--text-dim); font-size:12px; margin-top:20px;">Belum ada transaksi.</p>`;
         }
