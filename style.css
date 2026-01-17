@@ -452,4 +452,131 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 
 #price-display {
     text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+
+}
+
+/* --- RESPONSIVE DESIGN FOR SMARTPHONES --- */
+
+@media (max-width: 768px) {
+    /* 1. Navigasi Mobile */
+    nav {
+        padding: 15px 0;
+    }
+
+    .nav-container {
+        padding: 0 20px;
+    }
+
+    .nav-links {
+        gap: 15px;
+    }
+
+    /* Sembunyikan teks menu yang kurang penting untuk menghemat ruang */
+    .nav-links li:not(#nav-cart):not(#auth-section) {
+        display: none; 
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    /* 2. Hero Section */
+    .hero {
+        height: 80vh; /* Sedikit lebih pendek di hp */
+    }
+
+    .hero h1 {
+        font-size: 2.5rem; /* Ukuran teks judul lebih kecil */
+        margin-bottom: 15px;
+    }
+
+    .hero p {
+        font-size: 0.9rem;
+        padding: 0 10px;
+    }
+
+    /* 3. Modal & Pop-up */
+    .modal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+        padding: 20px !important;
+        border-radius: 20px;
+    }
+
+    .modal-large {
+        height: 85vh;
+        padding: 25px 15px !important;
+    }
+
+    .close-btn {
+        right: 15px;
+        top: 10px;
+        font-size: 32px;
+    }
+
+    /* 4. Grid Produk (Joki/Fruit) */
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr); /* Tampilan 2 kolom di HP */
+        gap: 12px;
+    }
+
+    .pkg-card {
+        padding: 15px;
+    }
+
+    .pkg-card h3 {
+        font-size: 14px;
+    }
+
+    .price {
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        padding: 10px 20px;
+        font-size: 13px;
+        width: 100%; /* Tombol memenuhi lebar kartu */
+    }
+
+    /* 5. Live Stock Iframe */
+    .stok-iframe-container {
+        height: 60vh;
+    }
+
+    /* 6. Tabs Kategori */
+    .category-tabs {
+        gap: 5px;
+    }
+
+    .btn-category {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    /* 7. Music Button */
+    .music-btn {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+
+    #music-text {
+        display: none; /* Sembunyikan teks, sisakan ikon saja di HP */
+    }
+}
+
+/* Extra Small Devices (HP Kecil) */
+@media (max-width: 400px) {
+    .product-grid {
+        grid-template-columns: 1fr; /* 1 kolom jika layar sangat sempit */
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
 }
