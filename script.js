@@ -632,42 +632,60 @@ document.querySelectorAll('.nav-links a').forEach(n => n.addEventListener('click
     menuLinks.classList.remove('active');
 }));
 
+// Logika Menu Mobile Tanpa Overlay (Agar fitur bisa diklik lancar)
 document.addEventListener('DOMContentLoaded', () => {
-    const menuBtn = document.querySelector('#mobile-menu');
-    const navLinks = document.querySelector('.nav-links');
-    
-    // Pastikan overlay hanya dibuat satu kali
-    let overlay = document.querySelector('.nav-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'nav-overlay';
-        document.body.appendChild(overlay);
-    }
+    const mobileBtn = document.getElementById('mobile-menu');
+    const navMenu = document.querySelector('.nav-links');
 
-    if (menuBtn) {
-        menuBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Mencegah "klik tembus" ke elemen bawah
-            menuBtn.classList.toggle('is-active');
-            navLinks.classList.toggle('active');
-            overlay.classList.toggle('show');
+    if (mobileBtn) {
+        mobileBtn.addEventListener('click', function() {
+            this.classList.toggle('is-active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Klik menu apa saja (Home/Live Stok), menu otomatis tertutup
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileBtn.classList.remove('is-active');
+                navMenu.classList.remove('active');
+            });
         });
     }
-
-    // Klik pada overlay untuk menutup
-    overlay.addEventListener('click', () => {
-        menuBtn.classList.remove('is-active');
-        navLinks.classList.remove('active');
-        overlay.classList.remove('show');
-    });
-
-    // Menutup menu saat link di dalam klik (Home, Live Stok, dll)
-    const links = document.querySelectorAll('.nav-links a');
-    links.forEach(link => {
-        link.addEventListener('click', () => {
-            menuBtn.classList.remove('is-active');
-            navLinks.classList.remove('active');
-            overlay.classList.remove('show');
-        });
-    });
 });
+
+// ==========================================
+// FITUR BACKSONG YOUTUBE
+// ==========================================
+
+var player;
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-player', {
+        height: '0',
+        width: '0',
+        videoId: 'vnoHcTMY55k', // ID dari link yang Anda berikan
+        playerVars: {
+            'autoplay': 1,
+            'loop': 1,
+            'playlist': 'vnoHcTMY55k'
+        },
+        events: {
+            'onReady': onPlayerReady
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    // Mencoba memutar otomatis
+    event.target.playVideo();
+    
+    // Karena kebijakan Autoplay browser, kita putar saat ada klik pertama di halaman
+    document.addEventListener('click', function() {
+        player.playVideo();
+    }, { once: true });
+}
+
+// Load YouTube API script secara asinkron
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
