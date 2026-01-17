@@ -636,27 +636,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuBtn = document.querySelector('#mobile-menu');
     const navLinks = document.querySelector('.nav-links');
     
-    // Tambahkan overlay ke body
-    const overlay = document.createElement('div');
-    overlay.className = 'nav-overlay';
-    document.body.appendChild(overlay);
+    // Pastikan overlay hanya dibuat satu kali
+    let overlay = document.querySelector('.nav-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'nav-overlay';
+        document.body.appendChild(overlay);
+    }
 
     if (menuBtn) {
-        menuBtn.onclick = () => {
+        menuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Mencegah "klik tembus" ke elemen bawah
             menuBtn.classList.toggle('is-active');
             navLinks.classList.toggle('active');
             overlay.classList.toggle('show');
-        };
+        });
     }
 
-    overlay.onclick = () => {
+    // Klik pada overlay untuk menutup
+    overlay.addEventListener('click', () => {
         menuBtn.classList.remove('is-active');
         navLinks.classList.remove('active');
         overlay.classList.remove('show');
-    };
+    });
 
-    // Otomatis tutup jika salah satu menu diklik
-    document.querySelectorAll('.nav-links a').forEach(link => {
+    // Menutup menu saat link di dalam klik (Home, Live Stok, dll)
+    const links = document.querySelectorAll('.nav-links a');
+    links.forEach(link => {
         link.addEventListener('click', () => {
             menuBtn.classList.remove('is-active');
             navLinks.classList.remove('active');
