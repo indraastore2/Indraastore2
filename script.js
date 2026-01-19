@@ -83,7 +83,7 @@ const jokiData = [
     { name: "Mythical Scroll", price: "Rp 80k", tag: "Mythic", cat: "Material", val: 80000 },
     { name: "V2 All Race", price: "Rp 3k", tag: "Belly Punya Buyer", cat: "Race", val: 3000 },
     { name: "V3 Race Not Ghoul", price: "Rp 5k", tag: "Belly Punya Buyer", cat: "Race", val: 5000 },
-    { name: "V2 Race Ghoul", price: "Rp 15k", tag: "Belly Punya Buyer", cat: "Race", val: 15000 },
+    { name: "V3 Race Ghoul", price: "Rp 15k", tag: "Belly Punya Buyer", cat: "Race", val: 15000 },
     { name: "Unlock Ghoul", price: "Rp 15k", tag: "Boss Cursed Ship ", cat: "Race", val: 15000 },
     { name: "Insert FOD", price: "Rp 10k", tag: "Fish Of Darkness", cat: "Race", val: 10000 },
     { name: "Unlock Cyborg", price: "Rp 10k", tag: "Fragment Punya Buyer + Wajib Sudah Insert FOD", cat: "Race", val: 10000 },
@@ -747,4 +747,5 @@ function onPlayerReady(event) {
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
+
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
