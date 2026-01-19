@@ -102,6 +102,8 @@ const jokiData = [
     { name: "Beast Hunter", price: "Rp 70k", tag: "-", cat: "Sea Event", val: 70000 },
     { name: "Leviathan Shield", price: "Rp 80k", tag: "-", cat: "Sea Event", val: 80000 },
     { name: "Remove Cd Bribe", price: "Rp 5k", tag: "-", cat: "Sea Event", val: 5000 },
+    { name: "Leviathan Heart TIKI", price: "Rp 30k", tag: "-", cat: "Sea Event", val: 30000 },
+    { name: "Freeze Hydra Island", price: "Rp 30k", tag: "-", cat: "Sea Event", val: 30000 },
     { name: "Fox Lamp + Bonus", price: "Rp 40k", tag: "-", cat: "Kitsune Event", val: 40000 },
     { name: "Azure Ember x25", price: "Rp 10k", tag: "-", cat: "Kitsune Event", val: 10000 },
     { name: "1 Belt", price: "Rp 5k", tag: "-", cat: "Dragon Event", val: 5000 },
@@ -219,7 +221,7 @@ function updateCartUI() {
 
         if (item.type === "Joki") {
             if (isLoyalPromoActive) {
-                itemPrice = item.val * 0.95; // Diskon 5%
+                itemPrice = item.val * 0.90; // Diskon 5%
             } else if (isDiscountActive) {
                 itemPrice = item.val * 0.98; // Diskon 2% (Flash Sale)
             }
@@ -228,7 +230,7 @@ function updateCartUI() {
     });
 
     if ((isLoyalPromoActive || isDiscountActive) && cart.some(i => i.type === "Joki")) {
-        const label = isLoyalPromoActive ? "Loyalitas 5%" : "Flash Sale 2%";
+        const label = isLoyalPromoActive ? "Loyalitas 10%" : "Flash Sale 2%";
         totalDiv.innerHTML = `
             <div style="font-size: 0.8rem; color: var(--text-dim); text-decoration: line-through;">Harga Normal: Rp ${totalMurni.toLocaleString('id-ID')}</div>
             <div style="color: #4ade80;">Total Akhir (${label}): Rp ${Math.floor(totalSetelahDiskon).toLocaleString('id-ID')}</div>
@@ -278,7 +280,7 @@ function checkoutWhatsApp() {
     cart.forEach(item => {
         let itemPrice = item.val;
         if (item.type === "Joki") {
-            if (isLoyalPromoActive) itemPrice = item.val * 0.95;
+            if (isLoyalPromoActive) itemPrice = item.val * 0.90;
             else if (isDiscountActive) itemPrice = item.val * 0.98;
         }
         totalSetelahDiskon += itemPrice;
@@ -290,7 +292,7 @@ function checkoutWhatsApp() {
     pesanWA += `💰 *Total Pembayaran:* Rp ${totalFinal.toLocaleString('id-ID')}\n`;
     
     if (isLoyalPromoActive && cart.some(i => i.type === "Joki")) {
-        pesanWA += `_(Promo Loyalitas 5% Aktif! 🎉)_\n`;
+        pesanWA += `_(Promo Loyalitas 10% Aktif! 🎉)_\n`;
     } else if (isDiscountActive && cart.some(i => i.type === "Joki")) {
         pesanWA += `_(Sudah termasuk potongan diskon Joki)_\n`;
     }
@@ -418,7 +420,7 @@ function loadUserHistory(email) {
                 // Set promo jika belum ada atau sudah kadaluwarsa
                 if (!localStorage.getItem('loyalPromoExpiry') || now > localStorage.getItem('loyalPromoExpiry')) {
                     localStorage.setItem('loyalPromoExpiry', now + sevenDays);
-                    alert("🎉 Luar biasa! Anda telah menyelesaikan " + orderCount + " order. Nikmati Promo Loyalitas 5% selama 7 hari ke depan!");
+                    alert("🎉 Luar biasa! Anda telah menyelesaikan " + orderCount + " order. Nikmati Promo Loyalitas 10% selama 7 hari ke depan!");
                 }
             }
         } else {
@@ -443,10 +445,16 @@ function loadAdminDashboard() {
                         <h4 style="color: var(--primary); font-size: 11px;">User: ${order.userEmail}</h4>
                         <p style="color: white; margin: 5px 0; font-size: 13px;">📦 ${order.items.map(i => i.name).join(', ')}</p>
                         <small>Total: Rp ${order.totalPrice.toLocaleString()}</small>
-                        <button onclick="konfirmasiSelesai('${orderId}')" 
-                                style="width: 100%; background: #22c55e; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: 800; margin-top: 10px;">
-                            SELESAI
-                        </button>
+                        <div style="display: flex; gap: 5px; width: 100%; margin-top: 10px;">
+                            <button onclick="konfirmasiSelesai('${orderId}')" 
+                                    style="flex: 2; background: #22c55e; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: 800;">
+                                SELESAI
+                            </button>
+                            <button onclick="batalkanPesanan('${orderId}')" 
+                                    style="flex: 1; background: #ef4444; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: 800;">
+                                CANCEL
+                            </button>
+                        </div>
                     </div>`;
             });
         } else {
@@ -468,6 +476,14 @@ window.konfirmasiSelesai = function(orderId) {
                 ref.remove();
                 alert("Berhasil!");
             });
+        });
+    }
+}
+
+window.batalkanPesanan = function(orderId) {
+    if (confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) {
+        database.ref('pending_orders/' + orderId).remove().then(() => {
+            alert("Pesanan berhasil dibatalkan.");
         });
     }
 }
