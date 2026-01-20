@@ -765,3 +765,38 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     width: 100%;
 }
 
+/* Fitur Quantity */
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.btn-qty {
+    background: var(--primary);
+    border: none;
+    color: #000;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.btn-qty:hover { transform: scale(1.1); }
+
+.qty-val {
+    font-weight: 800;
+    min-width: 15px;
+    text-align: center;
+    color: var(--text-main);
+    font-size: 14px;
+}

@@ -183,15 +183,39 @@ function renderContent(data) {
 }
 
 function addToCart(name, price, val) {
-    cart.push({ name, price, val, type: currentMainType }); 
+    // Cek apakah produk sudah ada di keranjang
+    const existingItem = cart.find(item => item.name === name);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({ 
+            name, 
+            price, 
+            val, 
+            type: currentMainType,
+            quantity: 1 
+        });
+    }
+    
     updateCartUI();
     const btn = event.target;
-    btn.innerText = "✓ Masuk Keranjang";
+    btn.innerText = "✓ Ditambahkan";
     setTimeout(() => btn.innerText = "Pilih Produk", 1000);
 }
 
+function changeQty(index, delta) {
+    cart[index].quantity += delta;
+    
+    // Jika jumlah kurang dari 1, hapus dari keranjang
+    if (cart[index].quantity <= 0) {
+        cart.splice(index, 1);
+    }
+    updateCartUI();
+}
+
 function updateCartUI() {
-    document.getElementById('cart-count').innerText = cart.length;
+    document.getElementById('cart-count').innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
     const cartItemsDiv = document.getElementById('cart-items');
     const totalDiv = document.getElementById('cart-total');
     
@@ -202,38 +226,45 @@ function updateCartUI() {
     }
 
     cartItemsDiv.innerHTML = cart.map((item, index) => `
-        <div class="cart-item">
-            <div><h5>${item.name}</h5><span>${item.price}</span></div>
-            <button onclick="removeItem(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Hapus</button>
+        <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <div>
+                <h5 style="margin:0;">${item.name}</h5>
+                <span style="font-size: 12px; color: var(--text-dim);">${item.price}</span>
+            </div>
+            <div class="qty-control">
+                <button class="btn-qty" onclick="changeQty(${index}, -1)">-</button>
+                <span class="qty-val">${item.quantity}</span>
+                <button class="btn-qty" onclick="changeQty(${index}, 1)">+</button>
+            </div>
         </div>
     `).join('');
 
     let totalMurni = 0;
     let totalSetelahDiskon = 0;
 
-    // Cek apakah promo 5% masih berlaku
     const promoExpiry = localStorage.getItem('loyalPromoExpiry');
     const isLoyalPromoActive = promoExpiry && Date.now() < promoExpiry;
 
     cart.forEach(item => {
-        totalMurni += item.val;
-        let itemPrice = item.val;
-
+        const itemSubtotal = item.val * item.quantity;
+        totalMurni += itemSubtotal;
+        
+        let priceAfterDiscount = itemSubtotal;
         if (item.type === "Joki") {
             if (isLoyalPromoActive) {
-                itemPrice = item.val * 0.90; // Diskon 5%
+                priceAfterDiscount = itemSubtotal * 0.90; // Promo Loyalitas 10%
             } else if (isDiscountActive) {
-                itemPrice = item.val * 0.98; // Diskon 2% (Flash Sale)
+                priceAfterDiscount = itemSubtotal * 0.98; // Flash Sale 2%
             }
         }
-        totalSetelahDiskon += itemPrice;
+        totalSetelahDiskon += priceAfterDiscount;
     });
 
     if ((isLoyalPromoActive || isDiscountActive) && cart.some(i => i.type === "Joki")) {
         const label = isLoyalPromoActive ? "Loyalitas 10%" : "Flash Sale 2%";
         totalDiv.innerHTML = `
             <div style="font-size: 0.8rem; color: var(--text-dim); text-decoration: line-through;">Harga Normal: Rp ${totalMurni.toLocaleString('id-ID')}</div>
-            <div style="color: #4ade80;">Total Akhir (${label}): Rp ${Math.floor(totalSetelahDiskon).toLocaleString('id-ID')}</div>
+            <div style="color: #4ade80; font-weight: 800;">Total Akhir (${label}): Rp ${Math.floor(totalSetelahDiskon).toLocaleString('id-ID')}</div>
         `;
     } else {
         totalDiv.innerText = "Total: Rp " + totalMurni.toLocaleString('id-ID');
@@ -273,22 +304,25 @@ function checkoutWhatsApp() {
     pesanWA += `👤 *Akun:* ${userSekarang}\n\n`;
 
     cart.forEach((item, index) => {
-        pesanWA += `${index + 1}. *${item.name}* (${item.type}) - ${item.price}\n`;
+        const itemTotal = item.val * item.quantity;
+        pesanWA += `${index + 1}. *${item.name}*\n`;
+        pesanWA += `   Jumlah: ${item.quantity}x\n`;
+        pesanWA += `   Subtotal: Rp ${itemTotal.toLocaleString('id-ID')}\n\n`;
     });
 
     let totalSetelahDiskon = 0;
     cart.forEach(item => {
-        let itemPrice = item.val;
+        let itemSubtotal = item.val * item.quantity;
         if (item.type === "Joki") {
-            if (isLoyalPromoActive) itemPrice = item.val * 0.90;
-            else if (isDiscountActive) itemPrice = item.val * 0.98;
+            if (isLoyalPromoActive) itemSubtotal *= 0.90;
+            else if (isDiscountActive) itemSubtotal *= 0.98;
         }
-        totalSetelahDiskon += itemPrice;
+        totalSetelahDiskon += itemSubtotal;
     });
 
     const totalFinal = Math.floor(totalSetelahDiskon);
     
-    pesanWA += `\n--------------------------------\n`;
+    pesanWA += `--------------------------------\n`;
     pesanWA += `💰 *Total Pembayaran:* Rp ${totalFinal.toLocaleString('id-ID')}\n`;
     
     if (isLoyalPromoActive && cart.some(i => i.type === "Joki")) {
@@ -299,7 +333,7 @@ function checkoutWhatsApp() {
     
     pesanWA += `\nMohon segera diproses ya!`;
 
-    // Kirim ke database (sama seperti sebelumnya)
+    // Kirim ke database
     const orderData = {
         userEmail: userSekarang,
         items: cart,
