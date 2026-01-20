@@ -765,3 +765,17 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     width: 100%;
 }
 
+/* - style.css */
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+#store-status-banner {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    z-index: 5;
+}
