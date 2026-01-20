@@ -822,46 +822,27 @@ function toggleStoreStatus() {
     });
 }
 
-// --- Tambahkan di bagian paling bawah script.js ---
-
-const mobileMenu = document.getElementById('mobile-menu');
-const navLinks = document.querySelector('.nav-links');
-
-if (mobileMenu) {
-    mobileMenu.addEventListener('click', () => {
-        // Toggle class 'active' untuk menampilkan menu
-        navLinks.classList.toggle('active');
-        // Toggle class 'is-active' untuk animasi tombol garis tiga
-        mobileMenu.classList.toggle('is-active');
-    });
-}
-
-// Tutup menu otomatis saat salah satu link diklik
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
-        mobileMenu.classList.remove('is-active');
-    });
-});
-
-// Fungsi Navigasi Mobile
+// --- PERBAIKAN LOGIKA KLIK MENU ---
 document.addEventListener('DOMContentLoaded', () => {
-    const menuToggle = document.getElementById('mobile-menu');
+    const mobileMenu = document.getElementById('mobile-menu');
     const navLinks = document.querySelector('.nav-links');
 
-    if (menuToggle && navLinks) {
-        menuToggle.onclick = function(e) {
-            e.preventDefault(); // Mencegah reload
+    if (mobileMenu) {
+        mobileMenu.onclick = function() {
+            // Membuka/Tutup Menu
             navLinks.classList.toggle('active');
+            // Animasi Tombol
             this.classList.toggle('is-active');
         };
-
-        // Tutup menu jika link diklik
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.onclick = () => {
-                navLinks.classList.remove('active');
-                menuToggle.classList.remove('is-active');
-            };
-        });
     }
+
+    // Menutup menu jika salah satu link diklik (agar user tidak bingung)
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.onclick = () => {
+            if(navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                mobileMenu.classList.remove('is-active');
+            }
+        };
+    });
 });
