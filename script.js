@@ -183,15 +183,7 @@ function renderContent(data) {
 }
 
 function addToCart(name, price, val) {
-    // Mengecek apakah item sudah ada di keranjang
-    const existingItem = cart.find(item => item.name === name);
-    
-    if (existingItem) {
-        existingItem.qty += 1;
-    } else {
-        cart.push({ name, price, val, type: currentMainType, qty: 1 }); 
-    }
-    
+    cart.push({ name, price, val, type: currentMainType }); 
     updateCartUI();
     const btn = event.target;
     btn.innerText = "✓ Masuk Keranjang";
@@ -199,10 +191,7 @@ function addToCart(name, price, val) {
 }
 
 function updateCartUI() {
-    // Hitung total item berdasarkan Quantity
-    const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
-    document.getElementById('cart-count').innerText = totalQty;
-    
+    document.getElementById('cart-count').innerText = cart.length;
     const cartItemsDiv = document.getElementById('cart-items');
     const totalDiv = document.getElementById('cart-total');
     
@@ -213,44 +202,31 @@ function updateCartUI() {
     }
 
     cartItemsDiv.innerHTML = cart.map((item, index) => `
-        <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <div>
-                <h5 style="margin:0;">${item.name}</h5>
-                <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                    <button onclick="changeQty(${index}, -1)" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 20px; height: 20px; border-radius: 4px; cursor: pointer;">-</button>
-                    <span style="font-size: 13px; color: var(--primary); font-weight: 800;">${item.qty}x</span>
-                    <button onclick="changeQty(${index}, 1)" style="background: rgba(255,255,255,0.1); border: none; color: white; width: 20px; height: 20px; border-radius: 4px; cursor: pointer;">+</button>
-                </div>
-            </div>
-            <div style="text-align: right;">
-                <span style="display: block; font-size: 14px;">Rp ${(item.val * item.qty).toLocaleString('id-ID')}</span>
-                <button onclick="removeItem(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size: 11px; padding:0;">Hapus</button>
-            </div>
+        <div class="cart-item">
+            <div><h5>${item.name}</h5><span>${item.price}</span></div>
+            <button onclick="removeItem(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">Hapus</button>
         </div>
     `).join('');
 
     let totalMurni = 0;
     let totalSetelahDiskon = 0;
 
-    // Cek promo loyalitas dari database/storage
+    // Cek apakah promo 5% masih berlaku
     const promoExpiry = localStorage.getItem('loyalPromoExpiry');
     const isLoyalPromoActive = promoExpiry && Date.now() < promoExpiry;
 
     cart.forEach(item => {
-        let subtotalItem = item.val * item.qty;
-        totalMurni += subtotalItem;
-        
-        let itemPriceAfterPromo = subtotalItem;
+        totalMurni += item.val;
+        let itemPrice = item.val;
 
-        // Promo hanya berlaku untuk tipe "Joki"
         if (item.type === "Joki") {
             if (isLoyalPromoActive) {
-                itemPriceAfterPromo = subtotalItem * 0.90; // Diskon 10%
+                itemPrice = item.val * 0.90; // Diskon 5%
             } else if (isDiscountActive) {
-                itemPriceAfterPromo = subtotalItem * 0.98; // Diskon 2%
+                itemPrice = item.val * 0.98; // Diskon 2% (Flash Sale)
             }
         }
-        totalSetelahDiskon += itemPriceAfterPromo;
+        totalSetelahDiskon += itemPrice;
     });
 
     if ((isLoyalPromoActive || isDiscountActive) && cart.some(i => i.type === "Joki")) {
@@ -261,16 +237,6 @@ function updateCartUI() {
         `;
     } else {
         totalDiv.innerText = "Total: Rp " + totalMurni.toLocaleString('id-ID');
-    }
-}
-
-// Fungsi Baru: Mengubah jumlah per item
-function changeQty(index, delta) {
-    cart[index].qty += delta;
-    if (cart[index].qty < 1) {
-        removeItem(index);
-    } else {
-        updateCartUI();
     }
 }
 
@@ -307,17 +273,17 @@ function checkoutWhatsApp() {
     pesanWA += `👤 *Akun:* ${userSekarang}\n\n`;
 
     cart.forEach((item, index) => {
-        pesanWA += `${index + 1}. *${item.name}* [${item.qty}x] (${item.type}) - Rp ${(item.val * item.qty).toLocaleString()}\n`;
+        pesanWA += `${index + 1}. *${item.name}* (${item.type}) - ${item.price}\n`;
     });
 
     let totalSetelahDiskon = 0;
     cart.forEach(item => {
-        let subtotal = item.val * item.qty;
+        let itemPrice = item.val;
         if (item.type === "Joki") {
-            if (isLoyalPromoActive) subtotal = subtotal * 0.90;
-            else if (isDiscountActive) subtotal = subtotal * 0.98;
+            if (isLoyalPromoActive) itemPrice = item.val * 0.90;
+            else if (isDiscountActive) itemPrice = item.val * 0.98;
         }
-        totalSetelahDiskon += subtotal;
+        totalSetelahDiskon += itemPrice;
     });
 
     const totalFinal = Math.floor(totalSetelahDiskon);
@@ -333,6 +299,7 @@ function checkoutWhatsApp() {
     
     pesanWA += `\nMohon segera diproses ya!`;
 
+    // Kirim ke database (sama seperti sebelumnya)
     const orderData = {
         userEmail: userSekarang,
         items: cart,
@@ -348,7 +315,7 @@ function checkoutWhatsApp() {
 }
 
 // ==========================================
-// AUTHENTICATION LOGIC
+// AUTHENTICATION LOGIC (FIXED)
 // ==========================================
 if(openAuth) openAuth.onclick = () => authModal.style.display = 'block';
 if(closeAuth) closeAuth.onclick = () => authModal.style.display = 'none';
@@ -431,7 +398,7 @@ function loadUserHistory(email) {
             
             snapshot.forEach((child) => {
                 const order = child.val();
-                if(order.status === "Selesai") orderCount++; 
+                if(order.status === "Selesai") orderCount++; // Hitung pesanan selesai
 
                 const date = new Date(order.createdAt).toLocaleDateString('id-ID', {
                     day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'
@@ -450,6 +417,7 @@ function loadUserHistory(email) {
             if (orderCount >= 10) {
                 const now = Date.now();
                 const sevenDays = 7 * 24 * 60 * 60 * 1000;
+                // Set promo jika belum ada atau sudah kadaluwarsa
                 if (!localStorage.getItem('loyalPromoExpiry') || now > localStorage.getItem('loyalPromoExpiry')) {
                     localStorage.setItem('loyalPromoExpiry', now + sevenDays);
                     alert("🎉 Luar biasa! Anda telah menyelesaikan " + orderCount + " order. Nikmati Promo Loyalitas 10% selama 7 hari ke depan!");
@@ -475,7 +443,7 @@ function loadAdminDashboard() {
                 historyList.innerHTML += `
                     <div class="history-item" style="border-left: 4px solid #f1c40f; flex-direction: column; align-items: flex-start; padding: 15px;">
                         <h4 style="color: var(--primary); font-size: 11px;">User: ${order.userEmail}</h4>
-                        <p style="color: white; margin: 5px 0; font-size: 13px;">📦 ${order.items.map(i => i.name + ' (' + i.qty + 'x)').join(', ')}</p>
+                        <p style="color: white; margin: 5px 0; font-size: 13px;">📦 ${order.items.map(i => i.name).join(', ')}</p>
                         <small>Total: Rp ${order.totalPrice.toLocaleString()}</small>
                         <div style="display: flex; gap: 5px; width: 100%; margin-top: 10px;">
                             <button onclick="konfirmasiSelesai('${orderId}')" 
@@ -540,11 +508,19 @@ function setMainType(type) {
 }
 
 function filterSub(cat, btn) {
+    // 1. Hapus kelas 'active' dari SEMUA tombol yang ada di subTabs
     const allButtons = document.querySelectorAll('#subTabs .btn-category');
     allButtons.forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+
+    // 2. Tambahkan kelas 'active' hanya pada tombol yang baru saja diklik
+    if (btn) {
+        btn.classList.add('active');
+    }
+
+    // 3. Filter data berdasarkan tipe utama (Joki/Fruit)
     const sourceData = currentMainType === "Joki" ? jokiData : fruitData;
     const filtered = cat === "Semua" ? sourceData : sourceData.filter(item => item.cat === cat);
+    
     renderContent(filtered);
 }
 
@@ -570,20 +546,25 @@ document.getElementById('btn-klaim').onclick = () => {
 };
 
 // ==========================================
-// MUSIC & TESTIMONI (TETAP SAMA)
+// MUSIC CONTROL
 // ==========================================
 const bgMusic = document.getElementById('bgMusic');
 const musicBtn = document.getElementById('music-control');
 const musicIcon = document.getElementById('music-icon');
+const musicText = document.getElementById('music-text');
 let isPlaying = false;
 
 function toggleMusic() {
     if (isPlaying) {
         bgMusic.pause();
         musicIcon.innerText = "🔈";
+        musicText.innerText = "Play Theme";
+        musicBtn.classList.remove('playing');
     } else {
         bgMusic.play();
         musicIcon.innerText = "🔊";
+        musicText.innerText = "Now Playing";
+        musicBtn.classList.add('playing');
     }
     isPlaying = !isPlaying;
 }
@@ -594,6 +575,9 @@ document.addEventListener('click', function startMusic() {
     document.removeEventListener('click', startMusic);
 }, { once: true });
 
+// ==========================================
+// TESTIMONI GALLERY
+// ==========================================
 const testiModal = document.getElementById('testiModal');
 const navTesti = document.getElementById('nav-testimoni');
 const closeTesti = document.getElementById('closeTesti');
@@ -644,14 +628,19 @@ fileInput.onchange = function() {
     }
 };
 
+// ==========================================
+// INITIALIZATION
+// ==========================================
 window.onload = () => {
     setTimeout(() => { document.getElementById('promoModal').style.display = 'block'; }, 2000);
+    
     const loggedInUser = localStorage.getItem('userLogin');
     if(loggedInUser) {
         authSection.innerHTML = `<a href="javascript:void(0)" id="openAuth" class="btn-primary" style="padding: 8px 20px;">👤 Akun</a>`;
         document.getElementById('openAuth').onclick = () => authModal.style.display = 'block';
         document.getElementById('auth-form').style.display = 'none';
         document.getElementById('user-profile').style.display = 'block';
+        
         if (loggedInUser === 'ADMIN') {
             document.getElementById('userNameDisplay').innerText = "Panel Admin";
             loadAdminDashboard();
@@ -662,33 +651,101 @@ window.onload = () => {
     }
 };
 
-window.onclick = (e) => { if(e.target.className === 'modal') e.target.style.display = 'none'; };
+window.onclick = (e) => { 
+    if(e.target.className === 'modal') e.target.style.display = 'none'; 
+};
 
-// YOUTUBE PLAYER INTEGRATION
+const menu = document.querySelector('#mobile-menu');
+const menuLinks = document.querySelector('#nav-list');
+
+// Klik tombol hamburger
+menu.addEventListener('click', function() {
+    menu.classList.toggle('is-active');
+    menuLinks.classList.toggle('active');
+});
+
+// Tutup menu saat salah satu link diklik
+document.querySelectorAll('.nav-links a').forEach(n => n.addEventListener('click', () => {
+    menu.classList.remove('is-active');
+    menuLinks.classList.remove('active');
+}));
+
+// Logika Menu Mobile Tanpa Overlay (Agar fitur bisa diklik lancar)
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileBtn = document.getElementById('mobile-menu');
+    const navMenu = document.querySelector('.nav-links');
+
+    if (mobileBtn) {
+        mobileBtn.addEventListener('click', function() {
+            this.classList.toggle('is-active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Klik menu apa saja (Home/Live Stok), menu otomatis tertutup
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileBtn.classList.remove('is-active');
+                navMenu.classList.remove('active');
+            });
+        });
+    }
+});
+
+// ==========================================
+// FITUR BACKSONG YOUTUBE DENGAN MUTE/UNMUTE
+// ==========================================
+
 var player;
 var isMuted = false;
+
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('youtube-player', {
-        height: '0', width: '0', videoId: 'vnoHcTMY55k',
-        playerVars: { 'autoplay': 1, 'loop': 1, 'playlist': 'vnoHcTMY55k' },
-        events: { 'onReady': onPlayerReady }
-    });
-}
-function onPlayerReady(event) {
-    event.target.playVideo();
-    const mBtn = document.getElementById('music-control');
-    const mIcon = document.getElementById('music-icon');
-    mBtn.addEventListener('click', function() {
-        if (isMuted) {
-            player.unMute(); player.playVideo();
-            mIcon.innerText = "🔊"; isMuted = false;
-        } else {
-            player.mute(); mIcon.innerText = "×"; isMuted = true;
+        height: '0',
+        width: '0',
+        videoId: 'vnoHcTMY55k',
+        playerVars: {
+            'autoplay': 1,
+            'loop': 1,
+            'playlist': 'vnoHcTMY55k'
+        },
+        events: {
+            'onReady': onPlayerReady
         }
     });
-    document.addEventListener('click', () => { if (!isMuted) player.playVideo(); }, { once: true });
 }
+
+function onPlayerReady(event) {
+    // Mulai putar video
+    event.target.playVideo();
+    
+    const musicBtn = document.getElementById('music-control');
+    const musicIcon = document.getElementById('music-icon');
+
+    // Fungsi Toggle Mute
+    musicBtn.addEventListener('click', function() {
+        if (isMuted) {
+            player.unMute();
+            player.playVideo(); // Pastikan jalan jika sebelumnya terhenti
+            musicIcon.innerText = "🔊";
+            isMuted = false;
+        } else {
+            player.mute();
+            musicIcon.innerText = "×";
+            isMuted = true;
+        }
+    });
+
+    // Autoplay Fix: Putar saat ada interaksi pertama user di halaman
+    document.addEventListener('click', function() {
+        if (!isMuted) {
+            player.playVideo();
+        }
+    }, { once: true });
+}
+
+// Load YouTube API script
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
