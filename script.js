@@ -822,18 +822,24 @@ function toggleStoreStatus() {
     });
 }
 
-// Fungsi untuk Hamburger Menu (Garis Tiga)
+// --- Tambahkan di bagian paling bawah script.js ---
+
 const mobileMenu = document.getElementById('mobile-menu');
 const navLinks = document.querySelector('.nav-links');
 
-mobileMenu.addEventListener('click', () => {
-    // Menambah/menghapus class 'active' pada menu dan tombol
-    navLinks.classList.toggle('active');
-    mobileMenu.classList.toggle('is-active');
-});
+if (mobileMenu) {
+    mobileMenu.addEventListener('click', () => {
+        // Toggle class 'active' untuk menampilkan menu
+        navLinks.classList.toggle('active');
+        // Toggle class 'is-active' untuk animasi tombol garis tiga
+        mobileMenu.classList.toggle('is-active');
+    });
+}
 
-// Menutup menu saat salah satu link diklik (opsional)
-document.querySelectorAll('.nav-links a').forEach(n => n.addEventListener('click', () => {
-    navLinks.classList.remove('active');
-    mobileMenu.classList.remove('is-active');
-}));
+// Tutup menu otomatis saat salah satu link diklik
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        mobileMenu.classList.remove('is-active');
+    });
+});
