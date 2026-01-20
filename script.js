@@ -843,3 +843,25 @@ document.querySelectorAll('.nav-links a').forEach(link => {
         mobileMenu.classList.remove('is-active');
     });
 });
+
+// Fungsi Navigasi Mobile
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('mobile-menu');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (menuToggle && navLinks) {
+        menuToggle.onclick = function(e) {
+            e.preventDefault(); // Mencegah reload
+            navLinks.classList.toggle('active');
+            this.classList.toggle('is-active');
+        };
+
+        // Tutup menu jika link diklik
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.onclick = () => {
+                navLinks.classList.remove('active');
+                menuToggle.classList.remove('is-active');
+            };
+        });
+    }
+});

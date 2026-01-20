@@ -461,7 +461,7 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     .menu-toggle {
         display: block;
         cursor: pointer;
-        z-index: 1001;
+        z-index: 9999;
         position: relative;
     }
 
