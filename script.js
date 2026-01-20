@@ -466,54 +466,32 @@ function loadUserHistory(email) {
 // ==========================================
 function loadAdminDashboard() {
     const historyList = document.getElementById('history-list');
-    
-    // Gunakan "database" sesuai inisialisasi di index.html Anda
     database.ref('pending_orders').on('value', (snapshot) => {
-        // Bagian Atas: Tombol Kontrol Toko
-        // Kita gunakan variabel lokal agar tampilan tombol sinkron saat render
-        const statusColor = isStoreOpen ? '#ef4444' : '#22c55e';
-        const statusText = isStoreOpen ? 'TUTUP TOKO (OFF)' : 'BUKA TOKO (ON)';
-        const labelText = isStoreOpen ? 'BUKA' : 'TUTUP';
-        const labelColor = isStoreOpen ? '#22c55e' : '#ef4444';
-
-        let htmlContent = `
-            <div id="admin-control-panel" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid var(--primary); text-align: center;">
-                <h3 style="font-size: 14px; margin-bottom: 5px; color: var(--primary);">KONTROL OPERASIONAL</h3>
-                <p style="font-size: 12px; margin-bottom: 15px;">Status Saat Ini: <strong style="color: ${labelColor}">${labelText}</strong></p>
-                
-                <button onclick="toggleStoreStatus()" id="btn-toggle-db" style="width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; background: ${statusColor}; color: white; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                    ${statusText}
-                </button>
-            </div>
-            <h3 style="font-size: 14px; margin-bottom: 15px; color: var(--primary); padding-left: 5px;">Daftar Antrian Pesanan:</h3>
-        `;
-
+        historyList.innerHTML = "";
         if (snapshot.exists()) {
             snapshot.forEach((child) => {
                 const order = child.val();
                 const orderId = child.key;
-                htmlContent += `
-                    <div class="history-item" style="border-left: 4px solid #f1c40f; flex-direction: column; align-items: flex-start; padding: 15px; margin-bottom: 12px; background: rgba(255,255,255,0.02);">
+                historyList.innerHTML += `
+                    <div class="history-item" style="border-left: 4px solid #f1c40f; flex-direction: column; align-items: flex-start; padding: 15px;">
                         <h4 style="color: var(--primary); font-size: 11px;">User: ${order.userEmail}</h4>
-                        <p style="color: white; margin: 8px 0; font-size: 13px;">📦 ${order.items.map(i => i.name + ' (' + i.qty + 'x)').join(', ')}</p>
-                        <small style="color: #94a3b8;">Total: Rp ${order.totalPrice.toLocaleString()}</small>
-                        <div style="display: flex; gap: 8px; width: 100%; margin-top: 12px;">
+                        <p style="color: white; margin: 5px 0; font-size: 13px;">📦 ${order.items.map(i => i.name + ' (' + i.qty + 'x)').join(', ')}</p>
+                        <small>Total: Rp ${order.totalPrice.toLocaleString()}</small>
+                        <div style="display: flex; gap: 5px; width: 100%; margin-top: 10px;">
                             <button onclick="konfirmasiSelesai('${orderId}')" 
-                                    style="flex: 2; background: #22c55e; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 800;">
+                                    style="flex: 2; background: #22c55e; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: 800;">
                                 SELESAI
                             </button>
                             <button onclick="batalkanPesanan('${orderId}')" 
-                                    style="flex: 1; background: #ef4444; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 800;">
+                                    style="flex: 1; background: #ef4444; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: 800;">
                                 CANCEL
                             </button>
                         </div>
                     </div>`;
             });
         } else {
-            htmlContent += "<p style='text-align:center; padding: 30px; color: #94a3b8; font-size: 12px;'>Tidak ada antrian pesanan saat ini.</p>";
+            historyList.innerHTML = "<p style='text-align:center; padding: 20px; font-size: 12px;'>Tidak ada antrean.</p>";
         }
-
-        historyList.innerHTML = htmlContent;
     });
 }
 
@@ -713,136 +691,4 @@ function onPlayerReady(event) {
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-// ==========================================
-// FITUR OPERASIONAL TOKO (BUKA/TUTUP)
-// ==========================================
-
-let isStoreOpen = true; // Status default
-
-// 1. Sinkronisasi Real-Time dengan Firebase
-db.ref("storeSettings/isOpen").on("value", (snapshot) => {
-    const status = snapshot.val();
-    // Jika data kosong di database, anggap buka (true)
-    isStoreOpen = (status !== null) ? status : true;
-    updateGlobalStoreUI();
-});
-
-// 2. Fungsi untuk Update Tampilan di Seluruh Halaman
-function updateGlobalStoreUI() {
-    const banner = document.getElementById('store-status-banner');
-    const orderBtn = document.getElementById('open-joki-hero');
-    const adminToggleBtn = document.getElementById('admin-toggle-store-btn');
-    const adminStatusIndicator = document.getElementById('admin-status-text');
-
-    if (!isStoreOpen) {
-        // --- JIKA TOKO TUTUP ---
-        if (banner) banner.style.display = 'inline-block';
-        
-        // Nonaktifkan tombol pesan
-        if (orderBtn) {
-            orderBtn.style.background = '#475569'; // Warna abu-abu
-            orderBtn.style.cursor = 'not-allowed';
-            orderBtn.style.transform = 'none';
-            orderBtn.innerText = 'TOKO SEDANG TUTUP';
-            orderBtn.onclick = function(e) { 
-                e.preventDefault(); 
-                alert('Maaf, toko kami sedang tutup. Silahkan kembali nanti!'); 
-                return false; 
-            };
-        }
-
-        // Update Tampilan Panel Admin (Jika sedang terbuka)
-        if (adminToggleBtn) {
-            adminToggleBtn.innerText = "BUKA TOKO SEKARANG";
-            adminToggleBtn.style.background = "#22c55e";
-        }
-        if (adminStatusIndicator) {
-            adminStatusIndicator.innerText = "TUTUP";
-            adminStatusIndicator.style.color = "#ef4444";
-        }
-    } else {
-        // --- JIKA TOKO BUKA ---
-        if (banner) banner.style.display = 'none';
-        
-        // Kembalikan tombol pesan ke fungsi asli
-        if (orderBtn) {
-            orderBtn.style.background = ''; // Kembali ke CSS asli
-            orderBtn.style.cursor = 'pointer';
-            orderBtn.innerText = 'Pesan Joki/Beli Fruit Sekarang';
-            orderBtn.onclick = function() { openCategory('Joki'); }; // Sesuaikan dengan fungsi asli Anda
-        }
-
-        if (adminToggleBtn) {
-            adminToggleBtn.innerText = "TUTUP TOKO (ON/OFF)";
-            adminToggleBtn.style.background = "#ef4444";
-        }
-        if (adminStatusIndicator) {
-            adminStatusIndicator.innerText = "BUKA";
-            adminStatusIndicator.style.color = "#22c55e";
-        }
-    }
-}
-
-database.ref('store_status').on('value', (snapshot) => {
-    isStoreOpen = snapshot.val() !== false; 
-    
-    const banner = document.getElementById('store-status-banner');
-    const heroBtn = document.getElementById('open-joki-hero');
-
-    if (!isStoreOpen) {
-        if (banner) banner.style.display = 'block';
-        if (heroBtn) {
-            heroBtn.style.background = '#475569';
-            heroBtn.innerText = 'TOKO SEDANG TUTUP';
-            // Alihkan fungsi klik agar tidak membuka menu
-            heroBtn.onclick = () => alert("Maaf, toko sedang tutup. Silahkan datang kembali nanti!");
-        }
-    } else {
-        if (banner) banner.style.display = 'none';
-        if (heroBtn) {
-            heroBtn.style.background = ''; // Kembali ke warna biru asli
-            heroBtn.innerText = 'Pesan Joki/Beli Fruit Sekarang';
-            // Kembalikan ke fungsi asli (membuka kategori Joki)
-            heroBtn.onclick = () => openCategory('Joki');
-        }
-    }
-});
-
-// 3. Fungsi untuk Admin mengubah status (Dijalankan saat klik tombol di panel admin)
-function toggleStoreStatus() {
-    // Membalikkan status saat ini di Firebase
-    database.ref('store_status').set(!isStoreOpen)
-    .then(() => {
-        console.log("Status berhasil diubah!");
-    })
-    .catch((error) => {
-        alert("Gagal mengubah status: " + error.message);
-    });
-}
-
-// --- PERBAIKAN LOGIKA KLIK MENU ---
-document.addEventListener('DOMContentLoaded', () => {
-    const mobileMenu = document.getElementById('mobile-menu');
-    const navLinks = document.querySelector('.nav-links');
-
-    if (mobileMenu) {
-        mobileMenu.onclick = function() {
-            // Membuka/Tutup Menu
-            navLinks.classList.toggle('active');
-            // Animasi Tombol
-            this.classList.toggle('is-active');
-        };
-    }
-
-    // Menutup menu jika salah satu link diklik (agar user tidak bingung)
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.onclick = () => {
-            if(navLinks.classList.contains('active')) {
-                navLinks.classList.remove('active');
-                mobileMenu.classList.remove('is-active');
-            }
-        };
-    });
-});
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
