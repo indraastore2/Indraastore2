@@ -785,18 +785,18 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 // ==========================================
-// SISTEM BUKA/TUTUP TOKO (REALTIME)
+// FIX: SISTEM BUKA/TUTUP TOKO (REALTIME)
 // ==========================================
-// 1. Hubungkan ke Firebase
-const shopStatusRef = firebase.database().ref('shopStatus');
 
-// 2. Fungsi untuk Mengatur Tampilan (Berlaku untuk SEMUA ORANG)
-shopStatusRef.on('value', (snapshot) => {
-    const isOpen = snapshot.exists() ? snapshot.val() : true;
+// 1. Definisikan Email Admin Anda di sini
+const EMAIL_ADMIN_UTAMA = "admin@indraastore.com"; // <-- PASTIKAN INI SAMA DENGAN EMAIL LOGIN ANDA
+
+const statusRef = firebase.database().ref('shopStatus');
+
+// Fungsi utama untuk mengatur tampilan tombol beli
+function setTampilanToko(isOpen) {
     const statusText = document.getElementById('status-toko-text');
     const toggleInput = document.getElementById('toggle-toko');
-    
-    // Pilih semua tombol yang harus dimatikan saat toko tutup
     const allButtons = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim');
 
     if (isOpen) {
@@ -805,38 +805,50 @@ shopStatusRef.on('value', (snapshot) => {
         allButtons.forEach(btn => {
             if(btn.id !== 'openAuth') { 
                 btn.style.pointerEvents = "auto"; 
-                btn.style.opacity = "1"; 
+                btn.style.opacity = "1";
+                btn.style.filter = "none";
             }
         });
     } else {
         if(statusText) { statusText.innerText = "TUTUP"; statusText.style.color = "#ef4444"; }
         if(toggleInput) toggleInput.checked = false;
         allButtons.forEach(btn => {
-            // JANGAN matikan tombol login, matikan tombol beli saja
             if(btn.id !== 'openAuth') { 
                 btn.style.pointerEvents = "none"; 
-                btn.style.opacity = "0.4"; 
+                btn.style.opacity = "0.4";
+                btn.style.filter = "grayscale(100%)";
             }
         });
     }
+}
+
+// Pantau status dari database secara realtime
+statusRef.on('value', (snapshot) => {
+    const status = snapshot.exists() ? snapshot.val() : true;
+    setTampilanToko(status);
 });
 
-// 3. Logika KHUSUS ADMIN (Menampilkan Tombol)
+// LOGIKA UNTUK MENAMPILKAN TOMBOL ADMIN
 firebase.auth().onAuthStateChanged((user) => {
-    const adminPanel = document.getElementById('admin-control');
+    const panelAdmin = document.getElementById('admin-control');
     
-    // MASUKKAN EMAIL ADMIN ANDA DI SINI
-    const EMAIL_ADMIN = "admin@indraastore.com"; 
-
-    if (user && user.email === EMAIL_ADMIN) {
-        // HANYA JIKA EMAIL COCOK, TOMBOL MUNCUL
-        adminPanel.setAttribute('style', 'display: flex !important; align-items: center; gap: 8px; margin-right: 15px;');
+    if (user) {
+        console.log("User Login Sebagai: " + user.email); // Cek email di console
         
-        document.getElementById('toggle-toko').onchange = function() {
-            shopStatusRef.set(this.checked);
-        };
+        if (user.email === EMAIL_ADMIN_UTAMA) {
+            console.log("Admin Terdeteksi! Memunculkan tombol...");
+            // Paksa muncul menggunakan inline style
+            panelAdmin.style.setProperty('display', 'flex', 'important');
+            
+            // Event listener klik untuk admin
+            const sw = document.getElementById('toggle-toko');
+            sw.onclick = function() {
+                statusRef.set(this.checked);
+            };
+        } else {
+            panelAdmin.style.setProperty('display', 'none', 'important');
+        }
     } else {
-        // JIKA BUKAN ADMIN, TOMBOL WAJIB HILANG
-        adminPanel.setAttribute('style', 'display: none !important;');
+        panelAdmin.style.setProperty('display', 'none', 'important');
     }
 });
