@@ -785,66 +785,63 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 // ==========================================
-// FIX ABSOLUT: SISTEM BUKA/TUTUP TOKO
+// FIX FINAL: SISTEM BUKA/TUTUP TOKO
 // ==========================================
 
-// 1. Ganti dengan email login Anda yang terdaftar di Firebase
-const EMAIL_ADMIN_ASLI = "admin@indraastore.com"; 
+// Email Admin Anda
+const EMAIL_ADMIN_FIX = "admin@indraastore.com"; 
 
-const dbStatusRef = firebase.database().ref('shopStatus');
+const shopRef = firebase.database().ref('shopStatus');
 
-// Fungsi untuk memaksa tombol muncul tanpa peduli CSS
-function paksaMunculTombol() {
-    const pnl = document.getElementById('admin-control');
-    if (pnl) {
-        pnl.setAttribute("style", "display: flex !important; align-items: center; gap: 8px; margin-right: 15px; visibility: visible !important; opacity: 1 !important;");
-        console.log("SISTEM: Tombol Admin Berhasil Dipaksa Muncul.");
-    }
-}
-
-// Sinkronisasi status Buka/Tutup ke semua pengunjung
-dbStatusRef.on('value', (snapshot) => {
+// 1. Sinkronisasi status toko (Buka/Tutup) untuk semua pengunjung
+shopRef.on('value', (snapshot) => {
     const isOpen = snapshot.exists() ? snapshot.val() : true;
-    const sTxt = document.getElementById('status-toko-text');
-    const sTgl = document.getElementById('toggle-toko');
-    const bBtns = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim');
+    const stText = document.getElementById('status-toko-text');
+    const stToggle = document.getElementById('toggle-toko');
+    // Ambil semua tombol transaksi: Checkout, Ambil Diskon, Tambah Keranjang
+    const allBtn = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim, .btn-confirm-delete');
 
     if (isOpen) {
-        if(sTxt) { sTxt.innerText = "BUKA"; sTxt.style.color = "#4ade80"; }
-        if(sTgl) sTgl.checked = true;
-        bBtns.forEach(btn => { if(btn.id !== 'openAuth') { btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; } });
+        if(stText) { stText.innerText = "BUKA"; stText.style.color = "#4ade80"; }
+        if(stToggle) stToggle.checked = true;
+        allBtn.forEach(btn => { 
+            if(btn.id !== 'openAuth') { 
+                btn.style.pointerEvents = "auto"; 
+                btn.style.opacity = "1"; 
+                btn.style.filter = "none";
+            } 
+        });
     } else {
-        if(sTxt) { sTxt.innerText = "TUTUP"; sTxt.style.color = "#ef4444"; }
-        if(sTgl) sTgl.checked = false;
-        bBtns.forEach(btn => { if(btn.id !== 'openAuth') { btn.style.pointerEvents = "none"; btn.style.opacity = "0.4"; } });
+        if(stText) { stText.innerText = "TUTUP"; stText.style.color = "#ef4444"; }
+        if(stToggle) stToggle.checked = false;
+        allBtn.forEach(btn => { 
+            if(btn.id !== 'openAuth') { 
+                btn.style.pointerEvents = "none"; 
+                btn.style.opacity = "0.4"; 
+                btn.style.filter = "grayscale(100%)";
+            } 
+        });
     }
 });
 
-// Pengecekan Login Admin (Tanpa delay)
+// 2. Deteksi Login Admin
 firebase.auth().onAuthStateChanged((user) => {
+    const panel = document.getElementById('admin-control');
     if (user) {
-        console.log("LOG: Login terdeteksi sebagai " + user.email);
-        if (user.email.toLowerCase() === EMAIL_ADMIN_ASLI.toLowerCase()) {
-            paksaMunculTombol();
+        // Cek apakah email yang login adalah admin@indraastore.com
+        if (user.email.toLowerCase() === EMAIL_ADMIN_FIX.toLowerCase()) {
+            if(panel) {
+                panel.style.setProperty('display', 'flex', 'important');
+            }
             
-            const checkbox = document.getElementById('toggle-toko');
-            if(checkbox) {
-                checkbox.onclick = function() {
-                    dbStatusRef.set(this.checked);
+            const sw = document.getElementById('toggle-toko');
+            if(sw) {
+                sw.onclick = function() {
+                    shopRef.set(this.checked);
                 };
             }
         }
-    }
-});
-
-// FITUR BYPASS: Jika tombol tetap tidak muncul karena script security, 
-// Klik logo "IndraaStore" di pojok kiri atas sebanyak 5 kali.
-let logoClicks = 0;
-document.querySelector('.logo').addEventListener('click', () => {
-    logoClicks++;
-    if(logoClicks === 5) {
-        paksaMunculTombol();
-        alert("Mode Admin Diaktifkan (Bypass)");
-        logoClicks = 0;
+    } else {
+        if(panel) panel.style.setProperty('display', 'none', 'important');
     }
 });
