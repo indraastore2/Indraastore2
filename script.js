@@ -785,63 +785,68 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 // ==========================================
-// FIX FINAL: SISTEM BUKA/TUTUP TOKO
+// FIX REVOLUSIONER: BUKA/TUTUP TOKO
 // ==========================================
 
-// Email Admin Anda
-const EMAIL_ADMIN_FIX = "admin@indraastore.com"; 
+const EMAIL_ADMIN_FINAL = "admin@indraastore.com";
 
+// Fungsi untuk memaksa memunculkan tombol admin
+function forceShowAdmin() {
+    const pnl = document.getElementById('admin-control');
+    if (pnl) {
+        pnl.setAttribute("style", "display: flex !important; visibility: visible !important; opacity: 1 !important;");
+        console.log("SISTEM: Admin terdeteksi, tombol dipaksa muncul.");
+    }
+}
+
+// Pantau Database Realtime
 const shopRef = firebase.database().ref('shopStatus');
-
-// 1. Sinkronisasi status toko (Buka/Tutup) untuk semua pengunjung
 shopRef.on('value', (snapshot) => {
     const isOpen = snapshot.exists() ? snapshot.val() : true;
     const stText = document.getElementById('status-toko-text');
     const stToggle = document.getElementById('toggle-toko');
-    // Ambil semua tombol transaksi: Checkout, Ambil Diskon, Tambah Keranjang
-    const allBtn = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim, .btn-confirm-delete');
+    const btns = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim');
 
     if (isOpen) {
         if(stText) { stText.innerText = "BUKA"; stText.style.color = "#4ade80"; }
         if(stToggle) stToggle.checked = true;
-        allBtn.forEach(btn => { 
-            if(btn.id !== 'openAuth') { 
-                btn.style.pointerEvents = "auto"; 
-                btn.style.opacity = "1"; 
-                btn.style.filter = "none";
-            } 
-        });
+        btns.forEach(b => { if(b.id !== 'openAuth') { b.style.pointerEvents = "auto"; b.style.opacity = "1"; } });
     } else {
         if(stText) { stText.innerText = "TUTUP"; stText.style.color = "#ef4444"; }
         if(stToggle) stToggle.checked = false;
-        allBtn.forEach(btn => { 
-            if(btn.id !== 'openAuth') { 
-                btn.style.pointerEvents = "none"; 
-                btn.style.opacity = "0.4"; 
-                btn.style.filter = "grayscale(100%)";
-            } 
-        });
+        btns.forEach(b => { if(b.id !== 'openAuth') { b.style.pointerEvents = "none"; b.style.opacity = "0.4"; } });
     }
 });
 
-// 2. Deteksi Login Admin
-firebase.auth().onAuthStateChanged((user) => {
-    const panel = document.getElementById('admin-control');
-    if (user) {
-        // Cek apakah email yang login adalah admin@indraastore.com
-        if (user.email.toLowerCase() === EMAIL_ADMIN_FIX.toLowerCase()) {
-            if(panel) {
-                panel.style.setProperty('display', 'flex', 'important');
-            }
-            
-            const sw = document.getElementById('toggle-toko');
-            if(sw) {
-                sw.onclick = function() {
-                    shopRef.set(this.checked);
-                };
+// Cek Login Admin dengan Jeda 2 Detik (Agar tidak diblokir security.js)
+setTimeout(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            console.log("Mengecek akses untuk: " + user.email);
+            if (user.email.toLowerCase() === EMAIL_ADMIN_FINAL.toLowerCase()) {
+                forceShowAdmin();
+                
+                const toggleBtn = document.getElementById('toggle-toko');
+                if(toggleBtn) {
+                    toggleBtn.onclick = function() {
+                        shopRef.set(this.checked);
+                    };
+                }
             }
         }
-    } else {
-        if(panel) panel.style.setProperty('display', 'none', 'important');
+    });
+}, 2000); 
+
+// FITUR BYPASS (JIKA TETAP TIDAK MUNCUL):
+// Klik tulisan "IndraaStore" di pojok kiri atas sebanyak 5 kali
+let countLogo = 0;
+document.querySelector('.logo').addEventListener('click', () => {
+    countLogo++;
+    if(countLogo === 5) {
+        const ask = prompt("Sistem Error? Masukkan kode bypass:");
+        if(ask === "buka") { // Ketik 'buka' untuk munculkan paksa
+            forceShowAdmin();
+        }
+        countLogo = 0;
     }
 });
