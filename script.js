@@ -808,12 +808,18 @@ database.ref('shopStatus').on('value', (snapshot) => {
     const stText = document.getElementById('status-toko-text');
     const stToggle = document.getElementById('toggle-toko');
     
+    // Ambil elemen modal tutup
+    const closedModal = document.getElementById('closedModal');
+    
     // Pilih semua tombol interaksi kecuali tombol akun
     const btns = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim, .pkg-card button');
 
     if (isOpen) {
+        // Logika saat BUKA
         if(stText) { stText.innerText = "BUKA"; stText.style.color = "#4ade80"; }
         if(stToggle) stToggle.checked = true;
+        if(closedModal) closedModal.style.display = 'none'; // Sembunyikan pop-up tutup
+        
         btns.forEach(b => { 
             if(b.id !== 'openAuth') { 
                 b.style.pointerEvents = "auto"; 
@@ -822,8 +828,16 @@ database.ref('shopStatus').on('value', (snapshot) => {
             } 
         });
     } else {
+        // Logika saat TUTUP
         if(stText) { stText.innerText = "TUTUP"; stText.style.color = "#ef4444"; }
         if(stToggle) stToggle.checked = false;
+        
+        // Tampilkan pop-up jika bukan Admin
+        const loggedInUser = localStorage.getItem('userLogin');
+        if(closedModal && loggedInUser !== 'ADMIN') { 
+            closedModal.style.display = 'flex'; 
+        }
+
         btns.forEach(b => { 
             if(b.id !== 'openAuth') { 
                 b.style.pointerEvents = "none"; 
