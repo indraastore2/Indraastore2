@@ -783,3 +783,51 @@ tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+// ==========================================
+// SISTEM BUKA/TUTUP TOKO (REALTIME)
+// ==========================================
+
+// Referensi database
+const shopStatusRef = firebase.database().ref('shopStatus');
+
+// 1. Fungsi Update Tampilan (Berlaku untuk semua user)
+shopStatusRef.on('value', (snapshot) => {
+    const isOpen = snapshot.exists() ? snapshot.val() : true;
+    const statusText = document.getElementById('status-toko-text');
+    const toggleInput = document.getElementById('toggle-toko');
+    const buttons = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim');
+
+    if (isOpen) {
+        if(statusText) { statusText.innerText = "BUKA"; statusText.style.color = "#4ade80"; }
+        if(toggleInput) toggleInput.checked = true;
+        buttons.forEach(btn => { 
+            if(btn.id !== 'openAuth') { btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; }
+        });
+    } else {
+        if(statusText) { statusText.innerText = "TUTUP"; statusText.style.color = "#ef4444"; }
+        if(toggleInput) toggleInput.checked = false;
+        buttons.forEach(btn => {
+            // Menonaktifkan tombol beli/checkout/klaim saat toko tutup
+            if(btn.id !== 'openAuth') { btn.style.pointerEvents = "none"; btn.style.opacity = "0.4"; }
+        });
+    }
+});
+
+// 2. Cek Login Admin (Tombol hanya muncul jika email cocok)
+firebase.auth().onAuthStateChanged((user) => {
+    const adminControl = document.getElementById('admin-control');
+    
+    // GANTI "admin@gmail.com" dengan email yang Anda gunakan untuk login di web ini
+    const EMAIL_ADMIN = "admin@indraastore.com"; 
+
+    if (user && user.email === EMAIL_ADMIN) {
+        adminControl.style.display = 'flex'; // Tampilkan tombol jika email benar
+        
+        document.getElementById('toggle-toko').onchange = function() {
+            shopStatusRef.set(this.checked);
+        };
+    } else {
+        adminControl.style.display = 'none'; // Sembunyikan jika bukan admin
+    }
+});
