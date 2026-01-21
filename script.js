@@ -785,70 +785,53 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 // ==========================================
-// FIX: SISTEM BUKA/TUTUP TOKO (REALTIME)
+// FIX FINAL: SISTEM BUKA/TUTUP TOKO
 // ==========================================
 
-// 1. Definisikan Email Admin Anda di sini
-const EMAIL_ADMIN_UTAMA = "admin@indraastore.com"; // <-- PASTIKAN INI SAMA DENGAN EMAIL LOGIN ANDA
+// 1. MASUKKAN EMAIL LOGIN ANDA DI SINI
+const EMAIL_ADMIN_FIX = "admin@indraastore.com";
 
-const statusRef = firebase.database().ref('shopStatus');
+const shopRef = firebase.database().ref('shopStatus');
 
-// Fungsi utama untuk mengatur tampilan tombol beli
-function setTampilanToko(isOpen) {
-    const statusText = document.getElementById('status-toko-text');
-    const toggleInput = document.getElementById('toggle-toko');
-    const allButtons = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim');
+// Sinkronisasi status toko (Buka/Tutup)
+shopRef.on('value', (snapshot) => {
+    const isOpen = snapshot.exists() ? snapshot.val() : true;
+    const stText = document.getElementById('status-toko-text');
+    const stToggle = document.getElementById('toggle-toko');
+    const allBtn = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim');
 
     if (isOpen) {
-        if(statusText) { statusText.innerText = "BUKA"; statusText.style.color = "#4ade80"; }
-        if(toggleInput) toggleInput.checked = true;
-        allButtons.forEach(btn => {
-            if(btn.id !== 'openAuth') { 
-                btn.style.pointerEvents = "auto"; 
-                btn.style.opacity = "1";
-                btn.style.filter = "none";
-            }
-        });
+        if(stText) { stText.innerText = "BUKA"; stText.style.color = "#4ade80"; }
+        if(stToggle) stToggle.checked = true;
+        allBtn.forEach(btn => { if(btn.id !== 'openAuth') { btn.style.pointerEvents = "auto"; btn.style.opacity = "1"; } });
     } else {
-        if(statusText) { statusText.innerText = "TUTUP"; statusText.style.color = "#ef4444"; }
-        if(toggleInput) toggleInput.checked = false;
-        allButtons.forEach(btn => {
-            if(btn.id !== 'openAuth') { 
-                btn.style.pointerEvents = "none"; 
-                btn.style.opacity = "0.4";
-                btn.style.filter = "grayscale(100%)";
-            }
-        });
+        if(stText) { stText.innerText = "TUTUP"; stText.style.color = "#ef4444"; }
+        if(stToggle) stToggle.checked = false;
+        allBtn.forEach(btn => { if(btn.id !== 'openAuth') { btn.style.pointerEvents = "none"; btn.style.opacity = "0.4"; } });
     }
-}
-
-// Pantau status dari database secara realtime
-statusRef.on('value', (snapshot) => {
-    const status = snapshot.exists() ? snapshot.val() : true;
-    setTampilanToko(status);
 });
 
-// LOGIKA UNTUK MENAMPILKAN TOMBOL ADMIN
+// Deteksi Admin secara Realtime
 firebase.auth().onAuthStateChanged((user) => {
-    const panelAdmin = document.getElementById('admin-control');
-    
+    const panel = document.getElementById('admin-control');
     if (user) {
-        console.log("User Login Sebagai: " + user.email); // Cek email di console
+        console.log("Mencoba mencocokkan email: " + user.email);
         
-        if (user.email === EMAIL_ADMIN_UTAMA) {
-            console.log("Admin Terdeteksi! Memunculkan tombol...");
-            // Paksa muncul menggunakan inline style
-            panelAdmin.style.setProperty('display', 'flex', 'important');
+        // Membandingkan email login dengan email admin (huruf kecil semua agar akurat)
+        if (user.email.toLowerCase() === EMAIL_ADMIN_FIX.toLowerCase()) {
+            if(panel) {
+                panel.style.setProperty('display', 'flex', 'important');
+                console.log("ADMIN TERDETEKSI - Tombol Dimunculkan");
+            }
             
-            // Event listener klik untuk admin
             const sw = document.getElementById('toggle-toko');
-            sw.onclick = function() {
-                statusRef.set(this.checked);
-            };
-        } else {
-            panelAdmin.style.setProperty('display', 'none', 'important');
+            if(sw) {
+                sw.onclick = function() {
+                    shopRef.set(this.checked);
+                };
+            }
         }
     } else {
-        panelAdmin.style.setProperty('display', 'none', 'important');
+        if(panel) panel.style.setProperty('display', 'none', 'important');
     }
 });
