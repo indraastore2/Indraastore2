@@ -1,7 +1,7 @@
 // ==========================================
 // DATA & STATE
 // ==========================================
-let isDiscountActive = false;
+let isDiscountActive = localStorage.getItem('promoClaimedAt') !== null;
 let cart = [];
 let currentMainType = "Joki";
 let isLoginMode = true;
@@ -182,6 +182,47 @@ function renderContent(data) {
     `).join('');
 }
 
+// Fungsi pembantu untuk cek masa berlaku 15 hari
+function getPromoStatus() {
+    const claimedAt = localStorage.getItem('promoClaimedAt');
+    if (!claimedAt) return { active: false, remaining: 0 };
+
+    const fifteenDays = 15 * 24 * 60 * 60 * 1000;
+    const elapsed = Date.now() - parseInt(claimedAt);
+    const remaining = fifteenDays - elapsed;
+
+    return {
+        active: remaining > 0,
+        remaining: remaining
+    };
+}
+
+function updatePromoTimer() {
+    const timerEl = document.getElementById('promo-timer');
+    const status = getPromoStatus();
+    const isLoggedIn = localStorage.getItem('userLogin') !== null;
+
+    if (isLoggedIn) {
+        if(timerEl) timerEl.innerHTML = "<span style='color:#4ade80'>✓ Diskon Member 40% Aktif Selamanya</span>";
+        return;
+    }
+
+    if (status.active && isDiscountActive) {
+        const days = Math.floor(status.remaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((status.remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        
+        if(timerEl) {
+            timerEl.innerHTML = `⏳ Sisa Waktu Promo: ${days}h ${hours}m`;
+            timerEl.style.color = "#fbbf24";
+        }
+    } else if (timerEl) {
+        timerEl.innerHTML = "";
+    }
+}
+
+// Jalankan timer setiap menit
+setInterval(updatePromoTimer, 60000);
+
 function addToCart(name, price, val) {
     // Cek apakah produk sudah ada di keranjang
     const existingItem = cart.find(item => item.name === name);
@@ -225,15 +266,16 @@ function updateCartUI() {
         return;
     }
 
+    // Render List Item
     cartItemsDiv.innerHTML = cart.map((item, index) => `
-        <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <div>
-                <h5 style="margin:0;">${item.name}</h5>
-                <span style="font-size: 12px; color: var(--text-dim);">${item.price}</span>
+        <div class="cart-item">
+            <div class="item-info">
+                <h4>${item.name}</h4>
+                <span>${item.price}</span>
             </div>
             <div class="qty-control">
                 <button class="btn-qty" onclick="changeQty(${index}, -1)">-</button>
-                <span class="qty-val">${item.quantity}</span>
+                <span>${item.quantity}</span>
                 <button class="btn-qty" onclick="changeQty(${index}, 1)">+</button>
             </div>
         </div>
@@ -241,34 +283,55 @@ function updateCartUI() {
 
     let totalMurni = 0;
     let totalSetelahDiskon = 0;
+    
+    const isLoggedIn = localStorage.getItem('userLogin') !== null;
+    const loginPromo = getPromoStatus('loginPromoStarted');
+    const popupPromo = getPromoStatus('promoClaimedAt');
+    
+    let diskonPersen = 0;
+    let label = "";
+    let sisaWaktu = 0;
 
-    const promoExpiry = localStorage.getItem('loyalPromoExpiry');
-    const isLoyalPromoActive = promoExpiry && Date.now() < promoExpiry;
+    // LOGIKA: User Login (40%) atau Popup (30%)
+    if (isLoggedIn && loginPromo.active) {
+        diskonPersen = 0.40;
+        label = " (Member 40%)";
+        sisaWaktu = loginPromo.remaining;
+    } else if (isDiscountActive && popupPromo.active) {
+        diskonPersen = 0.30;
+        label = " (Promo 30%)";
+        sisaWaktu = popupPromo.remaining;
+    }
 
     cart.forEach(item => {
-        const itemSubtotal = item.val * item.quantity;
-        totalMurni += itemSubtotal;
-        
-        let priceAfterDiscount = itemSubtotal;
-        if (item.type === "Joki") {
-            if (isLoyalPromoActive) {
-                priceAfterDiscount = itemSubtotal * 0.90; // Promo Loyalitas 10%
-            } else if (isDiscountActive) {
-                priceAfterDiscount = itemSubtotal * 0.98; // Flash Sale 2%
-            }
+        const sub = item.val * item.quantity;
+        totalMurni += sub;
+        if (item.type === "Joki" && diskonPersen > 0) {
+            totalSetelahDiskon += sub * (1 - diskonPersen);
+        } else {
+            totalSetelahDiskon += sub;
         }
-        totalSetelahDiskon += priceAfterDiscount;
     });
 
-    if ((isLoyalPromoActive || isDiscountActive) && cart.some(i => i.type === "Joki")) {
-        const label = isLoyalPromoActive ? "Loyalitas 10%" : "Flash Sale 2%";
+    // RENDER TAMPILAN TOTAL & TIMER
+    if (diskonPersen > 0 && cart.some(i => i.type === "Joki")) {
+        const days = Math.floor(sisaWaktu / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((sisaWaktu % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
         totalDiv.innerHTML = `
-            <div style="font-size: 0.8rem; color: var(--text-dim); text-decoration: line-through;">Harga Normal: Rp ${totalMurni.toLocaleString('id-ID')}</div>
-            <div style="color: #4ade80; font-weight: 800;">Total Akhir (${label}): Rp ${Math.floor(totalSetelahDiskon).toLocaleString('id-ID')}</div>
+            <div style="font-size: 11px; color: #fbbf24; margin-bottom: 5px;">
+                ⏳ Sisa Durasi Promo: ${days}h ${hours}m
+            </div>
+            <span style="text-decoration: line-through; font-size: 0.8em; color: var(--text-dim); opacity: 0.6;">
+                Rp ${totalMurni.toLocaleString('id-ID')}
+            </span><br>
+            Total: Rp ${Math.floor(totalSetelahDiskon).toLocaleString('id-ID')}${label}
         `;
     } else {
-        totalDiv.innerText = "Total: Rp " + totalMurni.toLocaleString('id-ID');
+        totalDiv.innerHTML = `Total: Rp ${totalMurni.toLocaleString('id-ID')}`;
     }
+    
+    updatePromoTimer(); // Panggil fungsi timer
 }
 
 function removeItem(index) {
@@ -296,44 +359,45 @@ function checkoutWhatsApp() {
 
     const userSekarang = localStorage.getItem('userLogin') || "Guest";
     const waNomor = "62895321940805";
-    const promoExpiry = localStorage.getItem('loyalPromoExpiry');
-    const isLoyalPromoActive = promoExpiry && Date.now() < promoExpiry;
+    const isLoggedIn = localStorage.getItem('userLogin') !== null;
     
+    let diskonPersen = 0;
+    if (isLoggedIn) diskonPersen = 0.40;
+    else if (isDiscountActive) diskonPersen = 0.30;
+
     let pesanWA = `*Halo Indraa Store, saya ingin order:*\n`;
     pesanWA += `--------------------------------\n`;
     pesanWA += `👤 *Akun:* ${userSekarang}\n\n`;
 
+    let totalSetelahDiskon = 0;
     cart.forEach((item, index) => {
-        const itemTotal = item.val * item.quantity;
+        let itemSubtotal = item.val * item.quantity;
+        let itemFinal = itemSubtotal;
+
+        if (item.type === "Joki" && diskonPersen > 0) {
+            itemFinal = itemSubtotal * (1 - diskonPersen);
+        }
+
         pesanWA += `${index + 1}. *${item.name}*\n`;
         pesanWA += `   Jumlah: ${item.quantity}x\n`;
-        pesanWA += `   Subtotal: Rp ${itemTotal.toLocaleString('id-ID')}\n\n`;
-    });
-
-    let totalSetelahDiskon = 0;
-    cart.forEach(item => {
-        let itemSubtotal = item.val * item.quantity;
-        if (item.type === "Joki") {
-            if (isLoyalPromoActive) itemSubtotal *= 0.90;
-            else if (isDiscountActive) itemSubtotal *= 0.98;
-        }
-        totalSetelahDiskon += itemSubtotal;
+        pesanWA += `   Subtotal: Rp ${Math.floor(itemFinal).toLocaleString('id-ID')}\n\n`;
+        
+        totalSetelahDiskon += itemFinal;
     });
 
     const totalFinal = Math.floor(totalSetelahDiskon);
-    
     pesanWA += `--------------------------------\n`;
     pesanWA += `💰 *Total Pembayaran:* Rp ${totalFinal.toLocaleString('id-ID')}\n`;
     
-    if (isLoyalPromoActive && cart.some(i => i.type === "Joki")) {
-        pesanWA += `_(Promo Loyalitas 10% Aktif! 🎉)_\n`;
-    } else if (isDiscountActive && cart.some(i => i.type === "Joki")) {
-        pesanWA += `_(Sudah termasuk potongan diskon Joki)_\n`;
+    if (isLoggedIn) {
+        pesanWA += `_(Promo Member 40% Aktif! 🎉)_\n`;
+    } else if (isDiscountActive) {
+        pesanWA += `_(Promo Flash Sale 30% Aktif! 🚀)_\n`;
     }
     
     pesanWA += `\nMohon segera diproses ya!`;
 
-    // Kirim ke database
+    // ... sisanya tetap sama (Firebase push dan window.open)
     const orderData = {
         userEmail: userSekarang,
         items: cart,
@@ -341,10 +405,8 @@ function checkoutWhatsApp() {
         status: userSekarang === "ADMIN" ? "Selesai" : "Diproses",
         createdAt: Date.now()
     };
-
     const refPath = userSekarang !== "Guest" ? 'pending_orders' : 'guest_orders';
     database.ref(refPath).push(orderData);
-
     window.open(`https://wa.me/${waNomor}?text=${encodeURIComponent(pesanWA)}`, '_blank');
 }
 
@@ -572,11 +634,12 @@ document.getElementById('nav-stok-live').onclick = () => {
 
 document.getElementById('closePackage').onclick = () => packageModal.style.display = 'none';
 document.getElementById('closePromo').onclick = () => document.getElementById('promoModal').style.display = 'none';
-document.getElementById('btn-klaim').onclick = () => {
+document.getElementById('btn-klaim').onclick = function() {
     isDiscountActive = true;
+    localStorage.setItem('promoClaimedAt', Date.now().toString());
+    document.getElementById('promoModal').style.display = "none";
     updateCartUI();
-    alert("Selamat! Diskon 2% telah diaktifkan.");
-    document.getElementById('promoModal').style.display = 'none';
+    alert("Promo 30% Berhasil Diklaim! Berlaku 15 hari.");
 };
 
 // ==========================================
