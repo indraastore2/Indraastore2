@@ -299,6 +299,12 @@ function updateCartUI() {
 
     // Hitung Diskon
     const isLoggedIn = localStorage.getItem('userLogin') !== null;
+    
+    // CATAT: Jika login tapi belum ada waktu mulai, buat titik awal 15 hari sekarang
+    if (isLoggedIn && !localStorage.getItem('loginPromoStarted')) {
+        localStorage.setItem('loginPromoStarted', Date.now().toString());
+    }
+
     const loginPromo = getPromoStatus('loginPromoStarted');
     const popupPromo = getPromoStatus('promoClaimedAt');
     
@@ -319,14 +325,13 @@ function updateCartUI() {
     cart.forEach(item => {
         let sub = item.val * item.quantity;
         totalMurni += sub;
-        // Diskon hanya untuk kategori Joki (cek string Joki pada nama atau properti)
+        // Diskon hanya untuk Joki (bukan Fruit)
         totalFinal += (item.name.toLowerCase().includes('fruit')) ? sub : sub * (1 - diskon);
     });
 
-    // Wadah Statis untuk Timer agar tidak hilang saat re-render
     if (diskon > 0) {
         totalDiv.innerHTML = `
-            <div id="promo-timer-display" style="font-size: 11px; color: #fbbf24; margin-bottom: 5px; font-weight: 800;"></div>
+            <div id="promo-timer-display" style="font-size: 11px; color: #fbbf24; margin-bottom: 5px; font-weight: 800; font-family: monospace;"></div>
             <span style="text-decoration: line-through; font-size: 0.8em; color: var(--text-dim); opacity: 0.6;">Rp ${totalMurni.toLocaleString('id-ID')}</span><br>
             Total: Rp ${Math.floor(totalFinal).toLocaleString('id-ID')}${label}
         `;
