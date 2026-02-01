@@ -183,66 +183,79 @@ function renderContent(data) {
 }
 
 // Fungsi pembantu untuk cek masa berlaku 15 hari
-function getPromoStatus() {
-    const claimedAt = localStorage.getItem('promoClaimedAt');
-    if (!claimedAt) return { active: false, remaining: 0 };
+function getPromoStatus(key) {
+    const startTime = localStorage.getItem(key);
+    if (!startTime) return { active: false, remaining: 0 };
 
-    const fifteenDays = 15 * 24 * 60 * 60 * 1000;
-    const elapsed = Date.now() - parseInt(claimedAt);
-    const remaining = fifteenDays - elapsed;
+    const DURASI_15_HARI = 15 * 24 * 60 * 60 * 1000; // dalam Milidetik
+    const waktuSekarang = Date.now(); // Waktu nyata saat ini
+    const waktuHabis = parseInt(startTime) + DURASI_15_HARI;
+    const sisaWaktu = waktuHabis - waktuSekarang;
 
-    return {
-        active: remaining > 0,
-        remaining: remaining
-    };
+    if (sisaWaktu <= 0) {
+        localStorage.removeItem(key); // Hapus jika sudah basi
+        return { active: false, remaining: 0 };
+    }
+    return { active: true, remaining: sisaWaktu };
 }
 
-function updatePromoTimer() {
-    const timerEl = document.getElementById('promo-timer');
-    const status = getPromoStatus();
+function startLiveCountdown() {
+    setInterval(() => {
+    const timerEl = document.getElementById('promo-timer-display');
+    if (!timerEl) return;
+
     const isLoggedIn = localStorage.getItem('userLogin') !== null;
+    const key = isLoggedIn ? 'loginPromoStarted' : 'promoClaimedAt';
+    const status = getPromoStatus(key);
 
-    if (isLoggedIn) {
-        if(timerEl) timerEl.innerHTML = "<span style='color:#4ade80'>✓ Diskon Member 40% Aktif Selamanya</span>";
-        return;
-    }
+    if (status.active) {
+        const d = Math.floor(status.remaining / (1000 * 60 * 60 * 24));
+        const h = Math.floor((status.remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((status.remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((status.remaining % (1000 * 60)) / 1000);
 
-    if (status.active && isDiscountActive) {
-        const days = Math.floor(status.remaining / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((status.remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        
-        if(timerEl) {
-            timerEl.innerHTML = `⏳ Sisa Waktu Promo: ${days}h ${hours}m`;
-            timerEl.style.color = "#fbbf24";
-        }
-    } else if (timerEl) {
-        timerEl.innerHTML = "";
+        timerEl.innerHTML = `⏳ Berakhir dlm: ${d} Hari ${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    } else {
+        timerEl.innerHTML = "❌ Promo Berakhir";
+        if(cart.length > 0) updateCartUI(); // Reset harga ke normal
     }
+}, 1000);
 }
 
-// Jalankan timer setiap menit
-setInterval(updatePromoTimer, 60000);
+// Jalankan fungsi timer saat halaman dimuat
+startLiveCountdown();
 
-function addToCart(name, price, val) {
-    // Cek apakah produk sudah ada di keranjang
+function addToCart(name, price, val, type) {
+    // 1. Logika memasukkan ke keranjang
     const existingItem = cart.find(item => item.name === name);
-    
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        cart.push({ 
-            name, 
-            price, 
-            val, 
-            type: currentMainType,
-            quantity: 1 
-        });
+        // Jika type tidak didefinisikan, default ke Joki agar bisa kena diskon
+        cart.push({ name, price, val, type: type || "Joki", quantity: 1 });
     }
-    
-    updateCartUI();
+
     const btn = event.target;
-    btn.innerText = "✓ Ditambahkan";
-    setTimeout(() => btn.innerText = "Pilih Produk", 1000);
+    if (btn && (btn.classList.contains('btn-primary') || btn.classList.contains('btn-package'))) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "✓ Ditambahkan";
+        btn.style.backgroundColor = "#22adc5"; // Hijau sukses
+        btn.style.pointerEvents = "none"; // Cegah klik ganda cepat
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.backgroundColor = ""; 
+            btn.style.pointerEvents = "auto";
+        }, 800);
+    }
+
+    const cartIcon = document.querySelector('.cart-icon');
+    if (cartIcon) {
+        cartIcon.style.transform = "scale(1.2) rotate(10deg)";
+        setTimeout(() => cartIcon.style.transform = "scale(1) rotate(0deg)", 200);
+    }
+
+    updateCartUI();
 }
 
 function changeQty(index, delta) {
@@ -256,17 +269,20 @@ function changeQty(index, delta) {
 }
 
 function updateCartUI() {
-    document.getElementById('cart-count').innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCount = document.getElementById('cart-count');
     const cartItemsDiv = document.getElementById('cart-items');
     const totalDiv = document.getElementById('cart-total');
-    
+
+    if (cartCount) cartCount.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (!cartItemsDiv || !totalDiv) return;
+
     if (cart.length === 0) {
         cartItemsDiv.innerHTML = "<p style='text-align:center; color:var(--text-dim); margin: 20px 0;'>Keranjang kosong.</p>";
         totalDiv.innerText = "Total: Rp 0";
         return;
     }
 
-    // Render List Item
+    // Render Item
     cartItemsDiv.innerHTML = cart.map((item, index) => `
         <div class="cart-item">
             <div class="item-info">
@@ -281,51 +297,38 @@ function updateCartUI() {
         </div>
     `).join('');
 
-    let totalMurni = 0;
-    let totalSetelahDiskon = 0;
-    
+    // Hitung Diskon
     const isLoggedIn = localStorage.getItem('userLogin') !== null;
     const loginPromo = getPromoStatus('loginPromoStarted');
     const popupPromo = getPromoStatus('promoClaimedAt');
     
-    let diskonPersen = 0;
+    let diskon = 0;
     let label = "";
-    let sisaWaktu = 0;
 
-    // LOGIKA: User Login (40%) atau Popup (30%)
     if (isLoggedIn && loginPromo.active) {
-        diskonPersen = 0.40;
+        diskon = 0.40;
         label = " (Member 40%)";
-        sisaWaktu = loginPromo.remaining;
     } else if (isDiscountActive && popupPromo.active) {
-        diskonPersen = 0.30;
+        diskon = 0.30;
         label = " (Promo 30%)";
-        sisaWaktu = popupPromo.remaining;
     }
 
+    let totalMurni = 0;
+    let totalFinal = 0;
+
     cart.forEach(item => {
-        const sub = item.val * item.quantity;
+        let sub = item.val * item.quantity;
         totalMurni += sub;
-        if (item.type === "Joki" && diskonPersen > 0) {
-            totalSetelahDiskon += sub * (1 - diskonPersen);
-        } else {
-            totalSetelahDiskon += sub;
-        }
+        // Diskon hanya untuk kategori Joki (cek string Joki pada nama atau properti)
+        totalFinal += (item.name.toLowerCase().includes('fruit')) ? sub : sub * (1 - diskon);
     });
 
-    // RENDER TAMPILAN TOTAL & TIMER
-    if (diskonPersen > 0 && cart.some(i => i.type === "Joki")) {
-        const days = Math.floor(sisaWaktu / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((sisaWaktu % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
+    // Wadah Statis untuk Timer agar tidak hilang saat re-render
+    if (diskon > 0) {
         totalDiv.innerHTML = `
-            <div style="font-size: 11px; color: #fbbf24; margin-bottom: 5px;">
-                ⏳ Sisa Durasi Promo: ${days}h ${hours}m
-            </div>
-            <span style="text-decoration: line-through; font-size: 0.8em; color: var(--text-dim); opacity: 0.6;">
-                Rp ${totalMurni.toLocaleString('id-ID')}
-            </span><br>
-            Total: Rp ${Math.floor(totalSetelahDiskon).toLocaleString('id-ID')}${label}
+            <div id="promo-timer-display" style="font-size: 11px; color: #fbbf24; margin-bottom: 5px; font-weight: 800;"></div>
+            <span style="text-decoration: line-through; font-size: 0.8em; color: var(--text-dim); opacity: 0.6;">Rp ${totalMurni.toLocaleString('id-ID')}</span><br>
+            Total: Rp ${Math.floor(totalFinal).toLocaleString('id-ID')}${label}
         `;
     } else {
         totalDiv.innerHTML = `Total: Rp ${totalMurni.toLocaleString('id-ID')}`;
@@ -635,11 +638,19 @@ document.getElementById('nav-stok-live').onclick = () => {
 document.getElementById('closePackage').onclick = () => packageModal.style.display = 'none';
 document.getElementById('closePromo').onclick = () => document.getElementById('promoModal').style.display = 'none';
 document.getElementById('btn-klaim').onclick = function() {
+    // 1. Ambil waktu saat ini HANYA JIKA belum pernah klaim sebelumnya
+    if (!localStorage.getItem('promoClaimedAt')) {
+        localStorage.setItem('promoClaimedAt', Date.now().toString());
+    }
+    
     isDiscountActive = true;
-    localStorage.setItem('promoClaimedAt', Date.now().toString());
     document.getElementById('promoModal').style.display = "none";
+    
+    // Simpan status modal agar tidak muncul lagi setelah refresh
+    localStorage.setItem('modalClosed', 'true');
+    
     updateCartUI();
-    alert("Promo 30% Berhasil Diklaim! Berlaku 15 hari.");
+    alert("Promo Berhasil Diaktifkan! Berlaku 15 hari dari sekarang.");
 };
 
 // ==========================================
@@ -920,6 +931,9 @@ function updateShopStatus(status) {
 
 // Cek Login Admin & Pasang Event Listener
 window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('modalClosed') === 'true') {
+    document.getElementById('promoModal').style.display = "none";
+    }
     const loggedInUser = localStorage.getItem('userLogin');
     
     if (loggedInUser === 'ADMIN') {
