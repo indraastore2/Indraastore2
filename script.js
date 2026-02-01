@@ -129,19 +129,19 @@ const jokiData = [
 
 const fruitData = [
     { name: "Kitsune", price: "Rp 45k", tag: "Stok Habis", cat: "Mythical", val: 45000 },
-    { name: "Tiger", price: "Rp 30k", tag: "Ready", cat: "Mythical", val: 30000 },
+    { name: "Tiger", price: "Rp 30k", tag: "Ready", cat: "Mythical", val: 25000 },
     { name: "Dragon", price: "Rp 180k", tag: "Stok Habis", cat: "Mythical", val: 180000 },
-    { name: "Yeti", price: "Rp 30k", tag: "Ready", cat: "Mythical", val: 30000 },
-    { name: "Gas", price: "Rp 15k", tag: "Ready", cat: "Mythical", val: 15000 },
-    { name: "Dough", price: "Rp 10k", tag: "Stok Habis", cat: "Mythical", val: 10000 },
-    { name: "T-Rex", price: "Rp 7k", tag: "Stok Habis", cat: "Mythical", val: 7000 },
+    { name: "Yeti", price: "Rp 30k", tag: "Ready", cat: "Mythical", val: 25000 },
+    { name: "Gas", price: "Rp 15k", tag: "Ready", cat: "Mythical", val: 12000 },
+    { name: "Dough", price: "Rp 10k", tag: "Ready", cat: "Mythical", val: 10000 },
+    { name: "T-Rex", price: "Rp 7k", tag: "Ready", cat: "Mythical", val: 7000 },
     { name: "Mammoth", price: "Rp 5k", tag: "Ready", cat: "Mythical", val: 5000 },
     { name: "Spirit", price: "Rp 5k", tag: "Ready", cat: "Mythical", val: 5000 },
     { name: "Control", price: "Rp 20k", tag: "Ready", cat: "Mythical", val: 20000 },
     { name: "Shadow", price: "Rp 4k", tag: "Ready", cat: "Mythical", val: 4000 },
     { name: "Venom", price: "Rp 5k", tag: "Ready", cat: "Mythical", val: 5000 },
-    { name: "Gravity", price: "Rp 10k", tag: "Ready", cat: "Mythical", val: 10000 },
-    { name: "Pain", price: "Rp 15k", tag: "Ready", cat: "Legendary", val: 15000 },
+    { name: "Gravity", price: "Rp 10k", tag: "Ready", cat: "Mythical", val: 8000 },
+    { name: "Pain", price: "Rp 15k", tag: "Ready", cat: "Legendary", val: 12000 },
     { name: "Lightning", price: "Rp 12k", tag: "Ready", cat: "Legendary", val: 12000 },
     { name: "Portal", price: "Rp 5k", tag: "Ready", cat: "Legendary", val: 5000 },
     { name: "Buddha", price: "Rp 5k", tag: "Ready", cat: "Legendary", val: 5000 },
@@ -972,4 +972,5 @@ if(logoEl) {
             countLogo = 0;
         }
     });
+
 }
