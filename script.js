@@ -1,6 +1,6 @@
-// ==========================================
+// =============
 // DATA & STATE
-// ==========================================
+// =============
 let isDiscountActive = localStorage.getItem('promoClaimedAt') !== null;
 let cart = [];
 let currentMainType = "Joki";
@@ -150,9 +150,9 @@ const fruitData = [
     { name: "Magma", price: "Rp 3k", tag: "Ready", cat: "Rare", val: 3000 }
 ];
 
-// ==========================================
+// ==================
 // ELEMENT SELECTORS
-// ==========================================
+// ==================
 const container = document.getElementById('joki-package-container');
 const mainTabs = document.getElementById('mainTabs');
 const subTabs = document.getElementById('subTabs');
@@ -168,9 +168,9 @@ const btnAuthAction = document.getElementById('btnAuthAction');
 const toggleAuth = document.getElementById('toggleAuth');
 const authTitle = document.getElementById('authTitle');
 
-// ==========================================
+// ===============================
 // CORE FUNCTIONS (LAYOUT & CART)
-// ==========================================
+// ===============================
 function renderContent(data) {
     container.innerHTML = data.map(item => `
         <div class="pkg-card">
@@ -181,19 +181,17 @@ function renderContent(data) {
         </div>
     `).join('');
 }
-
-// Fungsi pembantu untuk cek masa berlaku 15 hari
 function getPromoStatus(key) {
     const startTime = localStorage.getItem(key);
     if (!startTime) return { active: false, remaining: 0 };
 
-    const DURASI_15_HARI = 15 * 24 * 60 * 60 * 1000; // dalam Milidetik
-    const waktuSekarang = Date.now(); // Waktu nyata saat ini
+    const DURASI_15_HARI = 15 * 24 * 60 * 60 * 1000; 
+    const waktuSekarang = Date.now(); 
     const waktuHabis = parseInt(startTime) + DURASI_15_HARI;
     const sisaWaktu = waktuHabis - waktuSekarang;
 
     if (sisaWaktu <= 0) {
-        localStorage.removeItem(key); // Hapus jika sudah basi
+        localStorage.removeItem(key); 
         return { active: false, remaining: 0 };
     }
     return { active: true, remaining: sisaWaktu };
@@ -217,12 +215,11 @@ function startLiveCountdown() {
         timerEl.innerHTML = `⏳ Berakhir dlm: ${d} Hari ${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     } else {
         timerEl.innerHTML = "❌ Promo Berakhir";
-        if(cart.length > 0) updateCartUI(); // Reset harga ke normal
+        if(cart.length > 0) updateCartUI(); 
     }
 }, 1000);
 }
 
-// Jalankan fungsi timer saat halaman dimuat
 startLiveCountdown();
 
 function addToCart(name, price, val, type) {
@@ -230,7 +227,6 @@ function addToCart(name, price, val, type) {
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        // Simpan type (Joki/Fruit) ke dalam objek keranjang
         cart.push({ name, price, val, type: type || "Joki", quantity: 1 });
     }
 
@@ -238,8 +234,8 @@ function addToCart(name, price, val, type) {
     if (btn && (btn.classList.contains('btn-primary') || btn.classList.contains('btn-package'))) {
         const originalText = btn.innerHTML;
         btn.innerHTML = "✓ Ditambahkan";
-        btn.style.backgroundColor = "#22adc5"; // Hijau sukses
-        btn.style.pointerEvents = "none"; // Cegah klik ganda cepat
+        btn.style.backgroundColor = "#22adc5"; 
+        btn.style.pointerEvents = "none"; 
 
         setTimeout(() => {
             btn.innerHTML = originalText;
@@ -260,7 +256,6 @@ function addToCart(name, price, val, type) {
 function changeQty(index, delta) {
     cart[index].quantity += delta;
     
-    // Jika jumlah kurang dari 1, hapus dari keranjang
     if (cart[index].quantity <= 0) {
         cart.splice(index, 1);
     }
@@ -302,7 +297,6 @@ function updateCartUI() {
     let diskon = 0;
     let label = "";
 
-    // Tentukan besaran diskon berdasarkan status user
     if (isLoggedIn && loginPromo.active) {
         diskon = 0.40;
         label = " (Member 40%)";
@@ -323,12 +317,10 @@ function updateCartUI() {
             adaJoki = true;
             totalFinal += sub * (1 - diskon);
         } else {
-            // Jika Fruit, harga normal
             totalFinal += sub;
         }
     });
 
-    // LOGIKA TAMPILAN: Hanya tampilkan coretan & label promo jika ada item Joki DAN diskon aktif
     if (diskon > 0 && adaJoki) {
         totalDiv.innerHTML = `
             <div id="promo-timer-display" style="font-size: 11px; color: #fbbf24; margin-bottom: 5px; font-weight: 800; font-family: monospace;"></div>
@@ -336,11 +328,10 @@ function updateCartUI() {
             Total: Rp ${Math.floor(totalFinal).toLocaleString('id-ID')}${label}
         `;
     } else {
-        // Jika hanya Fruit atau tidak ada promo, tampilkan harga normal saja tanpa label
         totalDiv.innerHTML = `Total: Rp ${totalMurni.toLocaleString('id-ID')}`;
     }
     
-    updatePromoTimer(); // Panggil fungsi timer
+    updatePromoTimer();
 }
 
 function removeItem(index) {
@@ -383,7 +374,6 @@ function checkoutWhatsApp() {
         let itemSubtotal = item.val * item.quantity;
         let itemFinal = itemSubtotal;
 
-        // Diskon hanya berlaku jika tipenya Joki
         if (item.type === "Joki" && diskonPersen > 0) {
             itemFinal = itemSubtotal * (1 - diskonPersen);
         }
@@ -407,7 +397,6 @@ function checkoutWhatsApp() {
     
     pesanWA += `\nMohon segera diproses ya!`;
 
-    // ... sisanya tetap sama (Firebase push dan window.open)
     const orderData = {
         userEmail: userSekarang,
         items: cart,
@@ -420,9 +409,9 @@ function checkoutWhatsApp() {
     window.open(`https://wa.me/${waNomor}?text=${encodeURIComponent(pesanWA)}`, '_blank');
 }
 
-// ==========================================
-// AUTHENTICATION LOGIC (FIXED)
-// ==========================================
+// =====================
+// AUTHENTICATION LOGIC
+// =====================
 if(openAuth) openAuth.onclick = () => authModal.style.display = 'block';
 if(closeAuth) closeAuth.onclick = () => authModal.style.display = 'none';
 
@@ -519,11 +508,9 @@ function loadUserHistory(email) {
                     </div>`;
             });
 
-            // LOGIKA PROMO LOYALITAS (10x Order)
             if (orderCount >= 10) {
                 const now = Date.now();
                 const sevenDays = 7 * 24 * 60 * 60 * 1000;
-                // Set promo jika belum ada atau sudah kadaluwarsa
                 if (!localStorage.getItem('loyalPromoExpiry') || now > localStorage.getItem('loyalPromoExpiry')) {
                     localStorage.setItem('loyalPromoExpiry', now + sevenDays);
                     alert("🎉 Luar biasa! Anda telah menyelesaikan " + orderCount + " order. Nikmati Promo Loyalitas 10% selama 7 hari ke depan!");
@@ -535,9 +522,9 @@ function loadUserHistory(email) {
     });
 }
 
-// ==========================================
+// ================
 // ADMIN FUNCTIONS
-// ==========================================
+// ================
 function loadAdminDashboard() {
     const historyList = document.getElementById('history-list');
     database.ref('pending_orders').on('value', (snapshot) => {
@@ -594,9 +581,9 @@ window.batalkanPesanan = function(orderId) {
     }
 }
 
-// ==========================================
+// ==============
 // UI NAVIGATION
-// ==========================================
+// ==============
 function showLayananMenu() {
     document.getElementById('modalTitle').innerText = "Layanan Kami";
     subTabs.innerHTML = "";
@@ -614,16 +601,13 @@ function setMainType(type) {
 }
 
 function filterSub(cat, btn) {
-    // 1. Hapus kelas 'active' dari SEMUA tombol yang ada di subTabs
     const allButtons = document.querySelectorAll('#subTabs .btn-category');
     allButtons.forEach(b => b.classList.remove('active'));
 
-    // 2. Tambahkan kelas 'active' hanya pada tombol yang baru saja diklik
     if (btn) {
         btn.classList.add('active');
     }
 
-    // 3. Filter data berdasarkan tipe utama (Joki/Fruit)
     const sourceData = currentMainType === "Joki" ? jokiData : fruitData;
     const filtered = cat === "Semua" ? sourceData : sourceData.filter(item => item.cat === cat);
     
@@ -645,7 +629,6 @@ document.getElementById('nav-stok-live').onclick = () => {
 document.getElementById('closePackage').onclick = () => packageModal.style.display = 'none';
 document.getElementById('closePromo').onclick = () => document.getElementById('promoModal').style.display = 'none';
 document.getElementById('btn-klaim').onclick = function() {
-    // 1. Ambil waktu saat ini HANYA JIKA belum pernah klaim sebelumnya
     if (!localStorage.getItem('promoClaimedAt')) {
         localStorage.setItem('promoClaimedAt', Date.now().toString());
     }
@@ -653,16 +636,15 @@ document.getElementById('btn-klaim').onclick = function() {
     isDiscountActive = true;
     document.getElementById('promoModal').style.display = "none";
     
-    // Simpan status modal agar tidak muncul lagi setelah refresh
     localStorage.setItem('modalClosed', 'true');
     
     updateCartUI();
     alert("Promo Berhasil Diaktifkan! Berlaku 15 hari dari sekarang.");
 };
 
-// ==========================================
+// ==============
 // MUSIC CONTROL
-// ==========================================
+// ==============
 const bgMusic = document.getElementById('bgMusic');
 const musicBtn = document.getElementById('music-control');
 const musicIcon = document.getElementById('music-icon');
@@ -690,9 +672,9 @@ document.addEventListener('click', function startMusic() {
     document.removeEventListener('click', startMusic);
 }, { once: true });
 
-// ==========================================
+// ==================
 // TESTIMONI GALLERY
-// ==========================================
+// ==================
 const testiModal = document.getElementById('testiModal');
 const navTesti = document.getElementById('nav-testimoni');
 const closeTesti = document.getElementById('closeTesti');
@@ -743,9 +725,9 @@ fileInput.onchange = function() {
     }
 };
 
-// ==========================================
+// ===============
 // INITIALIZATION
-// ==========================================
+// ===============
 window.onload = () => {
     setTimeout(() => { document.getElementById('promoModal').style.display = 'block'; }, 2000);
     
@@ -773,19 +755,16 @@ window.onclick = (e) => {
 const menu = document.querySelector('#mobile-menu');
 const menuLinks = document.querySelector('#nav-list');
 
-// Klik tombol hamburger
 menu.addEventListener('click', function() {
     menu.classList.toggle('is-active');
     menuLinks.classList.toggle('active');
 });
 
-// Tutup menu saat salah satu link diklik
 document.querySelectorAll('.nav-links a').forEach(n => n.addEventListener('click', () => {
     menu.classList.remove('is-active');
     menuLinks.classList.remove('active');
 }));
 
-// Logika Menu Mobile Tanpa Overlay (Agar fitur bisa diklik lancar)
 document.addEventListener('DOMContentLoaded', () => {
     const mobileBtn = document.getElementById('mobile-menu');
     const navMenu = document.querySelector('.nav-links');
@@ -796,7 +775,6 @@ document.addEventListener('DOMContentLoaded', () => {
             navMenu.classList.toggle('active');
         });
 
-        // Klik menu apa saja (Home/Live Stok), menu otomatis tertutup
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
                 mobileBtn.classList.remove('is-active');
@@ -830,17 +808,15 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-    // Mulai putar video
     event.target.playVideo();
     
     const musicBtn = document.getElementById('music-control');
     const musicIcon = document.getElementById('music-icon');
 
-    // Fungsi Toggle Mute
     musicBtn.addEventListener('click', function() {
         if (isMuted) {
             player.unMute();
-            player.playVideo(); // Pastikan jalan jika sebelumnya terhenti
+            player.playVideo();
             musicIcon.innerText = "🔊";
             isMuted = false;
         } else {
@@ -850,7 +826,6 @@ function onPlayerReady(event) {
         }
     });
 
-    // Autoplay Fix: Putar saat ada interaksi pertama user di halaman
     document.addEventListener('click', function() {
         if (!isMuted) {
             player.playVideo();
@@ -858,23 +833,21 @@ function onPlayerReady(event) {
     }, { once: true });
 }
 
-// Load YouTube API script
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-// ==========================================
-// FIX REVOLUSIONER: BUKA/TUTUP TOKO (STABLE)
-// ==========================================
+// ================
+// BUKA/TUTUP TOKO
+// ================
 
 const EMAIL_ADMIN_FINAL = "admin@indraastore.com";
 
 function forceShowAdmin() {
     const pnl = document.getElementById('admin-control');
     if (pnl) {
-        // Gunakan flex karena parent-nya ul nav-links
         pnl.style.display = "flex"; 
         pnl.style.visibility = "visible";
         pnl.style.opacity = "1";
@@ -882,24 +855,19 @@ function forceShowAdmin() {
     }
 }
 
-// Pantau Status Toko Secara Realtime
-// Menggunakan variabel 'database' yang sudah didefinisikan di index.html
 database.ref('shopStatus').on('value', (snapshot) => {
     const isOpen = snapshot.exists() ? snapshot.val() : true;
     const stText = document.getElementById('status-toko-text');
     const stToggle = document.getElementById('toggle-toko');
     
-    // Ambil elemen modal tutup
     const closedModal = document.getElementById('closedModal');
-    
-    // Pilih semua tombol interaksi kecuali tombol akun
+
     const btns = document.querySelectorAll('.btn-primary, .btn-category, #btn-klaim, .pkg-card button');
 
     if (isOpen) {
-        // Logika saat BUKA
         if(stText) { stText.innerText = "BUKA"; stText.style.color = "#4ade80"; }
         if(stToggle) stToggle.checked = true;
-        if(closedModal) closedModal.style.display = 'none'; // Sembunyikan pop-up tutup
+        if(closedModal) closedModal.style.display = 'none';
         
         btns.forEach(b => { 
             if(b.id !== 'openAuth') { 
@@ -909,11 +877,9 @@ database.ref('shopStatus').on('value', (snapshot) => {
             } 
         });
     } else {
-        // Logika saat TUTUP
         if(stText) { stText.innerText = "TUTUP"; stText.style.color = "#ef4444"; }
         if(stToggle) stToggle.checked = false;
-        
-        // Tampilkan pop-up jika bukan Admin
+
         const loggedInUser = localStorage.getItem('userLogin');
         if(closedModal && loggedInUser !== 'ADMIN') { 
             closedModal.style.display = 'flex'; 
@@ -929,14 +895,12 @@ database.ref('shopStatus').on('value', (snapshot) => {
     }
 });
 
-// Fungsi untuk mengubah status di Firebase
 function updateShopStatus(status) {
     database.ref('shopStatus').set(status)
     .then(() => console.log("Status toko berhasil diubah ke: " + status))
     .catch((err) => alert("Gagal mengubah status: " + err.message));
 }
 
-// Cek Login Admin & Pasang Event Listener
 window.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('modalClosed') === 'true') {
     document.getElementById('promoModal').style.display = "none";
@@ -955,7 +919,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Fitur Bypass Logo
 let countLogo = 0;
 const logoEl = document.querySelector('.logo');
 if(logoEl) {
@@ -965,7 +928,6 @@ if(logoEl) {
             const ask = prompt("Sistem Admin Error? Masukkan kode bypass:");
             if(ask === "buka") { 
                 forceShowAdmin();
-                // Aktifkan listener toggle saat bypass
                 const toggleBtn = document.getElementById('toggle-toko');
                 if(toggleBtn) {
                     toggleBtn.onchange = function() { updateShopStatus(this.checked); };
