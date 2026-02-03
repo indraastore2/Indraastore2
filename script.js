@@ -129,10 +129,10 @@ const jokiData = [
 
 const fruitData = [
     { name: "Kitsune", price: "Rp 45k", tag: "Stok Habis", cat: "Mythical", val: 45000 },
-    { name: "Tiger", price: "Rp 30k", tag: "Ready", cat: "Mythical", val: 25000 },
+    { name: "Tiger", price: "Rp 25k", tag: "Ready", cat: "Mythical", val: 25000 },
     { name: "Dragon", price: "Rp 180k", tag: "Stok Habis", cat: "Mythical", val: 180000 },
-    { name: "Yeti", price: "Rp 30k", tag: "Ready", cat: "Mythical", val: 25000 },
-    { name: "Gas", price: "Rp 15k", tag: "Ready", cat: "Mythical", val: 12000 },
+    { name: "Yeti", price: "Rp 25k", tag: "Ready", cat: "Mythical", val: 25000 },
+    { name: "Gas", price: "Rp 12k", tag: "Ready", cat: "Mythical", val: 12000 },
     { name: "Dough", price: "Rp 10k", tag: "Ready", cat: "Mythical", val: 10000 },
     { name: "T-Rex", price: "Rp 7k", tag: "Ready", cat: "Mythical", val: 7000 },
     { name: "Mammoth", price: "Rp 5k", tag: "Ready", cat: "Mythical", val: 5000 },
@@ -140,8 +140,8 @@ const fruitData = [
     { name: "Control", price: "Rp 20k", tag: "Ready", cat: "Mythical", val: 20000 },
     { name: "Shadow", price: "Rp 4k", tag: "Ready", cat: "Mythical", val: 4000 },
     { name: "Venom", price: "Rp 5k", tag: "Ready", cat: "Mythical", val: 5000 },
-    { name: "Gravity", price: "Rp 10k", tag: "Ready", cat: "Mythical", val: 8000 },
-    { name: "Pain", price: "Rp 15k", tag: "Ready", cat: "Legendary", val: 12000 },
+    { name: "Gravity", price: "Rp 8k", tag: "Ready", cat: "Mythical", val: 8000 },
+    { name: "Pain", price: "Rp 12k", tag: "Ready", cat: "Legendary", val: 12000 },
     { name: "Lightning", price: "Rp 12k", tag: "Ready", cat: "Legendary", val: 12000 },
     { name: "Portal", price: "Rp 5k", tag: "Ready", cat: "Legendary", val: 5000 },
     { name: "Buddha", price: "Rp 5k", tag: "Ready", cat: "Legendary", val: 5000 },
@@ -177,7 +177,7 @@ function renderContent(data) {
             <div style="background:rgba(56,189,248,0.1); padding:5px 15px; border-radius:50px; display:inline-block; font-size:10px; font-weight:800; color:var(--primary); margin-bottom:10px;">${item.tag}</div>
             <h4>${item.name}</h4>
             <span class="price">${item.price}</span>
-            <button class="btn-primary" style="width:100%; font-size:12px;" onclick="addToCart('${item.name}', '${item.price}', ${item.val})">Pilih Produk</button>
+            <button class="btn-primary" style="width:100%; font-size:12px;" onclick="addToCart('${item.name}', '${item.price}', ${item.val}, '${currentMainType}')">Pilih Produk</button>
         </div>
     `).join('');
 }
@@ -226,12 +226,11 @@ function startLiveCountdown() {
 startLiveCountdown();
 
 function addToCart(name, price, val, type) {
-    // 1. Logika memasukkan ke keranjang
     const existingItem = cart.find(item => item.name === name);
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        // Jika type tidak didefinisikan, default ke Joki agar bisa kena diskon
+        // Simpan type (Joki/Fruit) ke dalam objek keranjang
         cart.push({ name, price, val, type: type || "Joki", quantity: 1 });
     }
 
@@ -282,7 +281,6 @@ function updateCartUI() {
         return;
     }
 
-    // Render Item
     cartItemsDiv.innerHTML = cart.map((item, index) => `
         <div class="cart-item">
             <div class="item-info">
@@ -297,20 +295,14 @@ function updateCartUI() {
         </div>
     `).join('');
 
-    // Hitung Diskon
     const isLoggedIn = localStorage.getItem('userLogin') !== null;
-    
-    // CATAT: Jika login tapi belum ada waktu mulai, buat titik awal 15 hari sekarang
-    if (isLoggedIn && !localStorage.getItem('loginPromoStarted')) {
-        localStorage.setItem('loginPromoStarted', Date.now().toString());
-    }
-
     const loginPromo = getPromoStatus('loginPromoStarted');
     const popupPromo = getPromoStatus('promoClaimedAt');
     
     let diskon = 0;
     let label = "";
 
+    // Tentukan besaran diskon berdasarkan status user
     if (isLoggedIn && loginPromo.active) {
         diskon = 0.40;
         label = " (Member 40%)";
@@ -321,21 +313,30 @@ function updateCartUI() {
 
     let totalMurni = 0;
     let totalFinal = 0;
+    let adaJoki = false;
 
     cart.forEach(item => {
         let sub = item.val * item.quantity;
         totalMurni += sub;
-        // Diskon hanya untuk Joki (bukan Fruit)
-        totalFinal += (item.name.toLowerCase().includes('fruit')) ? sub : sub * (1 - diskon);
+        
+        if (item.type === "Joki") {
+            adaJoki = true;
+            totalFinal += sub * (1 - diskon);
+        } else {
+            // Jika Fruit, harga normal
+            totalFinal += sub;
+        }
     });
 
-    if (diskon > 0) {
+    // LOGIKA TAMPILAN: Hanya tampilkan coretan & label promo jika ada item Joki DAN diskon aktif
+    if (diskon > 0 && adaJoki) {
         totalDiv.innerHTML = `
             <div id="promo-timer-display" style="font-size: 11px; color: #fbbf24; margin-bottom: 5px; font-weight: 800; font-family: monospace;"></div>
             <span style="text-decoration: line-through; font-size: 0.8em; color: var(--text-dim); opacity: 0.6;">Rp ${totalMurni.toLocaleString('id-ID')}</span><br>
             Total: Rp ${Math.floor(totalFinal).toLocaleString('id-ID')}${label}
         `;
     } else {
+        // Jika hanya Fruit atau tidak ada promo, tampilkan harga normal saja tanpa label
         totalDiv.innerHTML = `Total: Rp ${totalMurni.toLocaleString('id-ID')}`;
     }
     
@@ -382,6 +383,7 @@ function checkoutWhatsApp() {
         let itemSubtotal = item.val * item.quantity;
         let itemFinal = itemSubtotal;
 
+        // Diskon hanya berlaku jika tipenya Joki
         if (item.type === "Joki" && diskonPersen > 0) {
             itemFinal = itemSubtotal * (1 - diskonPersen);
         }
