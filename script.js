@@ -125,6 +125,9 @@ const jokiData = [
     { name: "Pale Scraf", price: "Rp 10k", tag: "Wajib Sea 3", cat: "Accessories", val: 10000 },
     { name: "Muskeeter Hat", price: "Rp 10k", tag: "Wajib Level 1800+", cat: "Accessories", val: 10000 },
     { name: "Pilot Helmet", price: "Rp 5k", tag: "Wajib Sea 3", cat: "Accessories", val: 5000 },
+    { name: "100 Heart ", price: "Rp 3k", tag: "-", cat: "Valentine Event", val: 3000 },
+    { name: "500 Heart ", price: "Rp 10k", tag: "-", cat: "Valentine Event", val: 10000 },
+    { name: "1000 Heart ", price: "Rp 15k", tag: "-", cat: "Valentine Event", val: 15000 },
 ];
 
 const fruitData = [
@@ -298,11 +301,11 @@ function updateCartUI() {
     let label = "";
 
     if (isLoggedIn && loginPromo.active) {
-        diskon = 0.40;
-        label = " (Member 40%)";
+        diskon = 0.05;
+        label = " (Member 5%)";
     } else if (isDiscountActive && popupPromo.active) {
-        diskon = 0.30;
-        label = " (Promo 30%)";
+        diskon = 0.03;
+        label = " (Promo 3%)";
     }
 
     let totalMurni = 0;
@@ -362,8 +365,8 @@ function checkoutWhatsApp() {
     const isLoggedIn = localStorage.getItem('userLogin') !== null;
     
     let diskonPersen = 0;
-    if (isLoggedIn) diskonPersen = 0.40;
-    else if (isDiscountActive) diskonPersen = 0.30;
+    if (isLoggedIn) diskonPersen = 0.05;
+    else if (isDiscountActive) diskonPersen = 0.03;
 
     let pesanWA = `*Halo Indraa Store, saya ingin order:*\n`;
     pesanWA += `--------------------------------\n`;
@@ -390,9 +393,9 @@ function checkoutWhatsApp() {
     pesanWA += `💰 *Total Pembayaran:* Rp ${totalFinal.toLocaleString('id-ID')}\n`;
     
     if (isLoggedIn) {
-        pesanWA += `_(Promo Member 40% Aktif! 🎉)_\n`;
+        pesanWA += `_(Promo Member 5% Aktif! 🎉)_\n`;
     } else if (isDiscountActive) {
-        pesanWA += `_(Promo Flash Sale 30% Aktif! 🚀)_\n`;
+        pesanWA += `_(Promo Flash Sale 3% Aktif! 🚀)_\n`;
     }
     
     pesanWA += `\nMohon segera diproses ya!`;
