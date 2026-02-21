@@ -97,7 +97,8 @@ const jokiData = [
     { name: "Train T5->T10", price: "Rp 15k", tag: "Wajib Ada 17.500 Fragment", cat: "V4", val: 15000 },
     { name: "Shark Necklace", price: "Rp 10k", tag: "-", cat: "Sea Event", val: 10000 },
     { name: "Terror Jaw", price: "Rp 10k", tag: "-", cat: "Sea Event", val: 10000 },
-    { name: "Mnster Magnet", price: "Rp 20k", tag: "Wajib Memiliki Shark Necklace & Terror Jaw", cat: "Sea Event", val: 20000 },
+    { name: "Monster Magnet", price: "Rp 20k", tag: "Wajib Memiliki Shark Necklace & Terror Jaw", cat: "Sea Event", val: 20000 },
+    { name: "Shark Anchor", price: "Rp 15k", tag: "-", cat: "Sea Event", val: 15000 },
     { name: "Leviathan Crown", price: "Rp 70k", tag: "-", cat: "Sea Event", val: 70000 },
     { name: "Beast Hunter", price: "Rp 70k", tag: "-", cat: "Sea Event", val: 70000 },
     { name: "Leviathan Shield", price: "Rp 80k", tag: "-", cat: "Sea Event", val: 80000 },
@@ -941,3 +942,4 @@ if(logoEl) {
     });
 
 }
+
