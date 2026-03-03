@@ -862,36 +862,3 @@ input:checked + .slider:before { transform: translateX(16px); }
     transform: translateY(-2px);
 }
 
-/* Styling Tombol Melayang */
-.mobile-nav-fab {
-    position: fixed;
-    bottom: 30px;
-    right: 25px;
-    z-index: 9999;
-    display: none; /* Default sembunyi */
-}
-
-.fab-item {
-    background: var(--primary); /* Mengikuti warna tema Indraa Store */
-    color: white;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
-    transition: 0.3s;
-    text-decoration: none;
-}
-
-.fab-item:active {
-    transform: scale(0.9);
-}
-
-/* Tampilkan HANYA di Mobile/Android (Lebar layar dibawah 768px) */
-@media screen and (max-width: 768px) {
-    .mobile-nav-fab {
-        display: block;
-    }
-}
