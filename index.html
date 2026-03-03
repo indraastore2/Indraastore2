@@ -53,16 +53,16 @@
         </div>
     </div>
 
-    <div id="confirmClearModal" class="modal">
-        <div class="modal-content" style="max-width: 350px; padding: 30px; text-align: center;">
-            <h3 style="margin-bottom: 15px;">Konfirmasi</h3>
-            <p style="color: var(--text-dim); margin-bottom: 25px;">Apakah anda yakin untuk mengkosongkan keranjang?</p>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-category" onclick="closeConfirmClear()" style="flex: 1;">Batal</button>
-                <button class="btn-primary" onclick="executeClearCart()" style="flex: 1; background: #ef4444; color: white;">Ya, Hapus</button>
-            </div>
+<div id="confirmClearModal" class="modal">
+    <div class="modal-content" style="max-width: 350px; padding: 30px; text-align: center;">
+        <h3 style="margin-bottom: 15px;">Konfirmasi</h3>
+        <p style="color: var(--text-dim); margin-bottom: 25px;">Apakah anda yakin untuk mengkosongkan keranjang?</p>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-category" onclick="closeConfirmClear()" style="flex: 1;">Batal</button>
+            <button class="btn-primary" onclick="executeClearCart()" style="flex: 1; background: #ef4444; color: white;">Ya, Hapus</button>
         </div>
     </div>
+</div>
 
     <div id="cancelModal" class="modal-cancel">
     <div class="cancel-card">
@@ -109,6 +109,7 @@
     <li><a href="#home">Home</a></li>
     <li><a href="javascript:void(0)" id="nav-stok-live">Live Stok Fruit</a></li>
     <li><a href="javascript:void(0)" id="nav-layanan">Layanan Joki/Fruit</a></li>
+    <li><a href="beli-akun.html">Jual Beli Akun</a></li>
     <li><a href="javascript:void(0)" id="nav-testimoni">Testimoni</a></li>
     <li id="auth-section"><a href="javascript:void(0)" class="btn-primary" id="openAuth" style="padding: 8px 20px;">Login</a></li>
     <li style="position: relative; cursor: pointer; margin-left: 20px; display: flex; align-items: center;" id="nav-cart">
@@ -231,6 +232,7 @@
 </script>
 
     <script src="script.js"></script>
+    <script src="akun.js"></script>
     <script src="security.js"></script>
 </body>
 </html>

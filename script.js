@@ -1,8 +1,9 @@
 // =============
 // DATA & STATE
 // =============
+let itemIndexToDelete = null;
 let isDiscountActive = localStorage.getItem('promoClaimedAt') !== null;
-let cart = [];
+let cart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
 let currentMainType = "Joki";
 let isLoginMode = true;
 
@@ -24,7 +25,7 @@ const jokiData = [
     { name: "100K Fragment", price: "Rp 180k", tag: "Best Seller", cat: "Currency", val: 180000 },
     { name: "1000 Exp Instinct ", price: "Rp 15k", tag: "Best Seller", cat: "Instinct", val: 15000 },
     { name: "Instinct V2 ", price: "Rp 10k", tag: "Best Seller", cat: "Instinct", val: 10000 },
-    { name: "Superhuman", price: "Rp 25k", tag: "Wajib Memiliki Dark Step, Electric, Water Kungfu, Dragon Breath", cat: "Fighting Style", val: 25000 },
+    { name: "Superhuman", price: "Rp 25k", tag: "Wajib Memiliki Dark Step, Electric, Water Kungfsu, Dragon Breath", cat: "Fighting Style", val: 25000 },
     { name: "Electric Claw", price: "Rp 5k", tag: "Wajib 400 Mastery Electric, 3M Belly, 5K Fragment", cat: "Fighting Style", val: 5000 },
     { name: "Death Step", price: "Rp 10k", tag: "Wajib 400 Mastery Dark Step", cat: "Fighting Style", val: 10000 },
     { name: "Sharkman Karate", price: "Rp 10k", tag: "Wajib 400 Mastery Water Kungfu, 3M Belly, 5K Fragment", cat: "Fighting Style", val: 10000 },
@@ -126,9 +127,6 @@ const jokiData = [
     { name: "Pale Scraf", price: "Rp 10k", tag: "Wajib Sea 3", cat: "Accessories", val: 10000 },
     { name: "Muskeeter Hat", price: "Rp 10k", tag: "Wajib Level 1800+", cat: "Accessories", val: 10000 },
     { name: "Pilot Helmet", price: "Rp 5k", tag: "Wajib Sea 3", cat: "Accessories", val: 5000 },
-    { name: "100 Heart ", price: "Rp 3k", tag: "-", cat: "Valentine Event", val: 3000 },
-    { name: "500 Heart ", price: "Rp 10k", tag: "-", cat: "Valentine Event", val: 10000 },
-    { name: "1000 Heart ", price: "Rp 15k", tag: "-", cat: "Valentine Event", val: 15000 },
 ];
 
 const fruitData = [
@@ -227,51 +225,85 @@ function startLiveCountdown() {
 startLiveCountdown();
 
 function addToCart(name, price, val, type) {
-    const existingItem = cart.find(item => item.name === name);
+    // 1. Ambil data terbaru dari storage
+    let currentCart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
+
+    const existingItem = currentCart.find(item => item.name === name);
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        cart.push({ name, price, val, type: type || "Joki", quantity: 1 });
+        // Gunakan val jika ada, jika tidak (untuk akun) konversi price ke angka
+        let numericPrice = val;
+        if (!numericPrice && typeof price === 'string') {
+            numericPrice = parseInt(price.replace(/[^0-9]/g, '')) || 0;
+            if (price.toLowerCase().includes('k')) numericPrice *= 1000;
+        }
+
+        currentCart.push({ 
+            name: name, 
+            price: price, 
+            val: numericPrice, 
+            type: type || "Joki", 
+            quantity: 1 
+        });
     }
 
-    const btn = event.target;
-    if (btn && (btn.classList.contains('btn-primary') || btn.classList.contains('btn-package'))) {
-        const originalText = btn.innerHTML;
-        btn.innerHTML = "✓ Ditambahkan";
-        btn.style.backgroundColor = "#22adc5"; 
-        btn.style.pointerEvents = "none"; 
+    // 2. SIMPAN KE STORAGE (Wajib agar tombol berfungsi)
+    localStorage.setItem('indraa_cart', JSON.stringify(currentCart));
+    
+    // Update variabel global cart agar sinkron
+    cart = currentCart;
 
+    // 3. Efek Visual Tombol
+    const btn = event.target;
+    if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = "✓ Berhasil";
+        btn.style.pointerEvents = "none"; 
         setTimeout(() => {
             btn.innerHTML = originalText;
-            btn.style.backgroundColor = ""; 
             btn.style.pointerEvents = "auto";
         }, 800);
     }
 
-    const cartIcon = document.querySelector('.cart-icon');
-    if (cartIcon) {
-        cartIcon.style.transform = "scale(1.2) rotate(10deg)";
-        setTimeout(() => cartIcon.style.transform = "scale(1) rotate(0deg)", 200);
-    }
-
+    // 4. Update Tampilan Keranjang
     updateCartUI();
 }
 
 function changeQty(index, delta) {
-    cart[index].quantity += delta;
+    // 1. Ambil data terbaru dari storage
+    cart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
     
-    if (cart[index].quantity <= 0) {
-        cart.splice(index, 1);
+    if (cart[index]) {
+        let newQty = (cart[index].quantity || 1) + delta;
+        
+        if (newQty <= 0) {
+            // LANGSUNG HAPUS TANPA MODAL
+            cart.splice(index, 1);
+        } else {
+            // Update jumlah barang
+            cart[index].quantity = newQty;
+        }
+        
+        // 2. Simpan permanen ke LocalStorage
+        localStorage.setItem('indraa_cart', JSON.stringify(cart));
+        
+        // 3. Update tampilan keranjang secara instan
+        updateCartUI();
     }
-    updateCartUI();
 }
 
 function updateCartUI() {
+    // 1. BARIS PALING PENTING: Ambil data terbaru dari storage agar sinkron dengan akun.js
+    cart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
+
     const cartCount = document.getElementById('cart-count');
     const cartItemsDiv = document.getElementById('cart-items');
     const totalDiv = document.getElementById('cart-total');
 
-    if (cartCount) cartCount.innerText = cart.reduce((sum, item) => sum + item.quantity, 0);
+    // Update angka badge (total item)
+    if (cartCount) cartCount.innerText = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    
     if (!cartItemsDiv || !totalDiv) return;
 
     if (cart.length === 0) {
@@ -280,6 +312,7 @@ function updateCartUI() {
         return;
     }
 
+    // Render HTML Keranjang
     cartItemsDiv.innerHTML = cart.map((item, index) => `
         <div class="cart-item">
             <div class="item-info">
@@ -288,33 +321,35 @@ function updateCartUI() {
             </div>
             <div class="qty-control">
                 <button class="btn-qty" onclick="changeQty(${index}, -1)">-</button>
-                <span>${item.quantity}</span>
+                <span>${item.quantity || 1}</span>
                 <button class="btn-qty" onclick="changeQty(${index}, 1)">+</button>
             </div>
         </div>
     `).join('');
 
+    // --- LOGIKA PROMO (JANGAN DIUBAH) ---
     const isLoggedIn = localStorage.getItem('userLogin') !== null;
     const loginPromo = getPromoStatus('loginPromoStarted');
     const popupPromo = getPromoStatus('promoClaimedAt');
-    
     let diskon = 0;
     let label = "";
-
     if (isLoggedIn && loginPromo.active) {
-        diskon = 0.05;
-        label = " (Member 5%)";
+        diskon = 0.05; label = " (Member 5%)";
     } else if (isDiscountActive && popupPromo.active) {
-        diskon = 0.03;
-        label = " (Promo 3%)";
+        diskon = 0.03; label = " (Promo 3%)";
     }
 
     let totalMurni = 0;
     let totalFinal = 0;
     let adaJoki = false;
 
+    // --- PERHITUNGAN HARGA ---
     cart.forEach(item => {
-        let sub = item.val * item.quantity;
+        // Pastikan quantity minimal 1 dan val adalah angka
+        let q = item.quantity || 1;
+        let v = parseInt(item.val) || 0; 
+        
+        let sub = v * q;
         totalMurni += sub;
         
         if (item.type === "Joki") {
@@ -325,6 +360,7 @@ function updateCartUI() {
         }
     });
 
+    // Update Tampilan Total
     if (diskon > 0 && adaJoki) {
         totalDiv.innerHTML = `
             <div id="promo-timer-display" style="font-size: 11px; color: #fbbf24; margin-bottom: 5px; font-weight: 800; font-family: monospace;"></div>
@@ -336,10 +372,59 @@ function updateCartUI() {
     }
     
     updatePromoTimer();
+    
+    // 2. Simpan kembali ke storage setelah perubahan qty (opsional)
+    localStorage.setItem('indraa_cart', JSON.stringify(cart));
 }
 
-function removeItem(index) {
-    cart.splice(index, 1);
+// Fungsi yang dipanggil oleh tombol "Ya, Hapus"
+function executeDeleteItem() {
+    if (itemIndexToDelete !== null) {
+        // Hapus item dari array
+        cart.splice(itemIndexToDelete, 1);
+        
+        // Simpan ke storage dan update UI
+        saveAndSync();
+        
+        // Tutup Modal
+        closeConfirmClear();
+        itemIndexToDelete = null;
+    }
+}
+
+function removeFromCart(index) {
+    // 1. Ambil data terbaru dari storage
+    let currentCart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
+    
+    // 2. Hapus item dari array berdasarkan index
+    currentCart.splice(index, 1);
+    
+    // 3. Simpan kembali ke localStorage
+    localStorage.setItem('indraa_cart', JSON.stringify(currentCart));
+    
+    // 4. Update variabel global agar sinkron dengan UI
+    cart = currentCart;
+    
+    // 5. Jalankan update tampilan
+    updateCartUI();
+
+    // 6. TUTUP MODAL (Jika Anda menggunakan modal konfirmasi)
+    // Sesuaikan ID 'confirmModal' dengan ID modal hapus Anda
+    const modalHapus = document.getElementById('confirmModal'); 
+    if (modalHapus) {
+        modalHapus.style.display = 'none';
+    }
+}
+
+function openClearCartModal() {
+    const modal = document.getElementById('confirmClearModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function saveAndSync() {
+    localStorage.setItem('indraa_cart', JSON.stringify(cart));
     updateCartUI();
 }
 
@@ -349,13 +434,27 @@ function showConfirmClear() {
 }
 
 function closeConfirmClear() {
-    confirmModal.style.display = 'none';
+    const modal = document.getElementById('confirmClearModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 function executeClearCart() {
+    // Kosongkan array cart
     cart = [];
+    
+    // Hapus dari LocalStorage
+    localStorage.removeItem('indraa_cart');
+    
+    // Update tampilan
     updateCartUI();
+    
+    // Tutup Modal
     closeConfirmClear();
+    
+    // Opsional: Notifikasi singkat
+    console.log("Keranjang telah dikosongkan");
 }
 
 function checkoutWhatsApp() {
@@ -364,6 +463,8 @@ function checkoutWhatsApp() {
     const userSekarang = localStorage.getItem('userLogin') || "Guest";
     const waNomor = "62895321940805";
     const isLoggedIn = localStorage.getItem('userLogin') !== null;
+    const finalCart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
+    if (finalCart.length === 0) return alert("Keranjang masih kosong!");
     
     let diskonPersen = 0;
     if (isLoggedIn) diskonPersen = 0.05;

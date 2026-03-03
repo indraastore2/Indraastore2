@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jual Beli Akun Bloxfruit | Indraa Store</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="akun.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Indraa<span>Store</span></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Beranda</a></li>
+                <li><a href="beli-akun.html" class="active">Beli Akun</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="market-container">
+        <header class="section-header">
+            <div class="badge">BLOXFRUIT MARKET</div>
+            <h2>Daftar Akun Ready</h2>
+            <p>Akun aman, bergaransi, dan pengiriman instan via WhatsApp.</p>
+        </header>
+
+        <div class="account-grid" id="marketDisplay"></div>
+    </main>
+
+    <div id="adminTriggerContainer" style="display: none; justify-content: center; margin-bottom: 40px; padding: 0 5%;">
+    <button class="btn-primary" onclick="openAdminModal()" style="width: 100%; max-width: 900px; padding: 18px; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);">
+        ➕ POST AKUN BARU
+    </button>
+</div>
+
+<div id="adminModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; padding: 30px; position: relative; background: var(--card-bg); border: 1px solid var(--primary);">
+        <span onclick="closeAdminModal()" style="position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer; color: var(--text-dim); transition: 0.3s;">&times;</span>
+        
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 25px;">
+            <div style="width: 10px; height: 30px; background: var(--primary); border-radius: 5px;"></div>
+            <h3 style="color: var(--text-main); font-size: 1.5rem;">Panel Manajemen Stok</h3>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="input-group">
+                <label style="display:block; margin-bottom:8px; font-size:13px; color:var(--text-dim);">Nama Akun</label>
+                <input type="text" id="accName" placeholder="Contoh: Godhuman + Dough V2" style="width:100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white;">
+            </div>
+            <div class="input-group">
+                <label style="display:block; margin-bottom:8px; font-size:13px; color:var(--text-dim);">Harga</label>
+                <input type="text" id="accPrice" placeholder="Rp 150.000" style="width:100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white;">
+            </div>
+            <div class="input-group">
+                <label style="display:block; margin-bottom:8px; font-size:13px; color:var(--text-dim);">Level</label>
+                <input type="text" id="accLevel" placeholder="2550 (Max)" style="width:100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white;">
+            </div>
+            <div class="input-group">
+                <label style="display:block; margin-bottom:8px; font-size:13px; color:var(--text-dim);">Buah (Fruit)</label>
+                <input type="text" id="accFruit" placeholder="Kitsune / Leopard" style="width:100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white;">
+            </div>
+            <div class="input-group" style="grid-column: span 2;">
+                <label style="display:block; margin-bottom:8px; font-size:13px; color:var(--text-dim);">Sword (Senjata)</label>
+                <input type="text" id="accSword" placeholder="CDK / Tushita / Hallow Scythe" style="width:100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white;">
+            </div>
+            <div class="input-group" style="grid-column: span 2;">
+                <label style="display:block; margin-bottom:8px; font-size:13px; color:var(--text-dim);">Link Foto Akun</label>
+                <input type="text" id="accImage" placeholder="https://i.postimg.cc/xxxx/image.png" style="width:100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white;">
+            </div>
+        </div>
+
+        <button onclick="uploadAccount()" class="btn-primary" style="margin-top: 25px; width: 100%; padding: 15px; font-weight: 800; text-transform: uppercase;">
+            🚀 Posting Akun Sekarang
+        </button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script src="akun.js"></script>
+</body>
+</html>
