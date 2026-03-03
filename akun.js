@@ -1,4 +1,3 @@
-// Fungsi untuk menampilkan kartu ke HTML
 function displayAccounts() {
     const grid = document.getElementById('marketDisplay');
     if (!grid) return;
@@ -25,26 +24,21 @@ function displayAccounts() {
     `).join('');
 }
 
-// 1. KONFIGURASI FIREBASE
 const firebaseConfig = {
     databaseURL: "https://indraa-store-default-rtdb.asia-southeast1.firebasedatabase.app/" 
 };
 
-// Inisialisasi aman: Cek apakah Firebase sudah jalan atau belum
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const database = firebase.database();
 
-// 2. TAMPILKAN PANEL ADMIN (Jika Login)
 function initAdminPanel() {
-    // Ambil status login
     const loggedInUser = localStorage.getItem('userLogin'); 
     const trigger = document.getElementById('adminTriggerContainer');
     
-    // Pastikan ID 'adminTriggerContainer' ada di HTML
     if (loggedInUser === 'ADMIN' && trigger) {
-        trigger.style.display = 'flex'; // Munculkan tombol jika admin
+        trigger.style.display = 'flex'; 
     }
 }
 
@@ -58,7 +52,6 @@ function closeAdminModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// 3. FUNGSI POSTING (DIPERBAIKI)
 function uploadAccount() {
     try {
         const name = document.getElementById('accName').value.trim();
@@ -73,7 +66,6 @@ function uploadAccount() {
             return;
         }
 
-        // CARA AMAN: Ambil tombol yang spesifik di dalam modal
         const btn = document.querySelector("#adminModal .btn-primary") || document.querySelector("#adminPanel .btn-primary");
         
         if (btn) {
@@ -89,7 +81,7 @@ function uploadAccount() {
         })
         .then(() => {
             alert("✅ Sukses! Akun berhasil diposting.");
-            closeAdminModal(); // Tutup modal otomatis
+            closeAdminModal();
             location.reload(); 
         })
         .catch((err) => {
@@ -106,7 +98,6 @@ function uploadAccount() {
     }
 }
 
-// 4. LOAD DATA (Tampil Realtime)
 function loadMarketData() {
     const grid = document.getElementById('marketDisplay');
     const isAdmin = localStorage.getItem('userLogin') === 'ADMIN';
@@ -153,14 +144,13 @@ function deleteAcc(key) {
     if (confirm("Hapus akun ini?")) database.ref('marketAccounts/' + key).remove();
 }
 
-// ==========================================
-// FIX: SINKRONISASI KERANJANG INDRAA STORE
-// ==========================================
+// ===========================
+// FIX: SINKRONISASI KERANJANG
+// ===========================
 
 function addToCart(id, name, price) {
     let currentCart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
 
-    // Cek duplikasi berdasarkan nama agar lebih akurat
     const isExist = currentCart.find(item => item.name === "[AKUN] " + name);
     if (isExist) {
         alert("⚠️ Akun ini sudah ada di keranjang!");
@@ -174,7 +164,7 @@ function addToCart(id, name, price) {
         name: "[AKUN] " + name,
         price: price,      
         val: numericPrice, 
-        quantity: 1,       // WAJIB ADA agar tidak dikali nol
+        quantity: 1,       
         tag: "Ready Stock",
         cat: "Akun"
     };
@@ -184,7 +174,6 @@ function addToCart(id, name, price) {
     
     alert(`✅ ${name} berhasil masuk ke keranjang!`);
     
-    // Update tampilan badge angka jika fungsinya tersedia
     if (typeof updateCartBadge === "function") {
         updateCartBadge();
     } else if (typeof updateCartUI === "function") {
@@ -205,10 +194,8 @@ function updateCartBadge() {
     }
 }
 
-// Pastikan angka keranjang muncul saat halaman dibuka
 document.addEventListener('DOMContentLoaded', updateCartBadge);
 
-// Inisialisasi saat window load
 window.onload = () => {
     initAdminPanel();
     loadMarketData();

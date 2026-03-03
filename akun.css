@@ -1,4 +1,3 @@
-/* Custom Styles for Account Page */
 .market-container {
     padding: 120px 5% 60px;
     max-width: 1200px;
@@ -13,7 +12,7 @@
 }
 
 .account-card {
-    background: var(--card-bg); /* Mengambil warna dari style.css utama */
+    background: var(--card-bg);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     overflow: hidden;
@@ -96,12 +95,11 @@
     color: var(--primary) !important;
 }
 
-/* Style Tombol Hapus Khusus Admin */
 .btn-delete {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(239, 68, 68, 0.9); /* Merah */
+    background: rgba(239, 68, 68, 0.9);
     color: white;
     border: none;
     padding: 6px 12px;
@@ -119,7 +117,39 @@
     transform: scale(1.05);
 }
 
-/* Animasi saat kartu dihapus */
 .account-card {
     transition: transform 0.3s, opacity 0.3s;
+}
+
+.mobile-nav-fab {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    z-index: 1000;
+    display: none;
+}
+
+.fab-item {
+    background: var(--primary);
+    color: #fff;
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.fab-item:active {
+    transform: scale(0.85);
+}
+
+@media screen and (max-width: 768px) {
+    .mobile-nav-fab {
+        display: block;
+    }
 }

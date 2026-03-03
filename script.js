@@ -225,14 +225,12 @@ function startLiveCountdown() {
 startLiveCountdown();
 
 function addToCart(name, price, val, type) {
-    // 1. Ambil data terbaru dari storage
     let currentCart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
 
     const existingItem = currentCart.find(item => item.name === name);
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        // Gunakan val jika ada, jika tidak (untuk akun) konversi price ke angka
         let numericPrice = val;
         if (!numericPrice && typeof price === 'string') {
             numericPrice = parseInt(price.replace(/[^0-9]/g, '')) || 0;
@@ -248,13 +246,10 @@ function addToCart(name, price, val, type) {
         });
     }
 
-    // 2. SIMPAN KE STORAGE (Wajib agar tombol berfungsi)
     localStorage.setItem('indraa_cart', JSON.stringify(currentCart));
     
-    // Update variabel global cart agar sinkron
     cart = currentCart;
 
-    // 3. Efek Visual Tombol
     const btn = event.target;
     if (btn) {
         const originalText = btn.innerHTML;
@@ -266,42 +261,33 @@ function addToCart(name, price, val, type) {
         }, 800);
     }
 
-    // 4. Update Tampilan Keranjang
     updateCartUI();
 }
 
 function changeQty(index, delta) {
-    // 1. Ambil data terbaru dari storage
     cart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
     
     if (cart[index]) {
         let newQty = (cart[index].quantity || 1) + delta;
         
         if (newQty <= 0) {
-            // LANGSUNG HAPUS TANPA MODAL
             cart.splice(index, 1);
         } else {
-            // Update jumlah barang
             cart[index].quantity = newQty;
         }
         
-        // 2. Simpan permanen ke LocalStorage
         localStorage.setItem('indraa_cart', JSON.stringify(cart));
-        
-        // 3. Update tampilan keranjang secara instan
         updateCartUI();
     }
 }
 
 function updateCartUI() {
-    // 1. BARIS PALING PENTING: Ambil data terbaru dari storage agar sinkron dengan akun.js
     cart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
 
     const cartCount = document.getElementById('cart-count');
     const cartItemsDiv = document.getElementById('cart-items');
     const totalDiv = document.getElementById('cart-total');
 
-    // Update angka badge (total item)
     if (cartCount) cartCount.innerText = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     
     if (!cartItemsDiv || !totalDiv) return;
@@ -312,7 +298,6 @@ function updateCartUI() {
         return;
     }
 
-    // Render HTML Keranjang
     cartItemsDiv.innerHTML = cart.map((item, index) => `
         <div class="cart-item">
             <div class="item-info">
@@ -327,7 +312,6 @@ function updateCartUI() {
         </div>
     `).join('');
 
-    // --- LOGIKA PROMO (JANGAN DIUBAH) ---
     const isLoggedIn = localStorage.getItem('userLogin') !== null;
     const loginPromo = getPromoStatus('loginPromoStarted');
     const popupPromo = getPromoStatus('promoClaimedAt');
@@ -343,9 +327,7 @@ function updateCartUI() {
     let totalFinal = 0;
     let adaJoki = false;
 
-    // --- PERHITUNGAN HARGA ---
     cart.forEach(item => {
-        // Pastikan quantity minimal 1 dan val adalah angka
         let q = item.quantity || 1;
         let v = parseInt(item.val) || 0; 
         
@@ -360,7 +342,6 @@ function updateCartUI() {
         }
     });
 
-    // Update Tampilan Total
     if (diskon > 0 && adaJoki) {
         totalDiv.innerHTML = `
             <div id="promo-timer-display" style="font-size: 11px; color: #fbbf24; margin-bottom: 5px; font-weight: 800; font-family: monospace;"></div>
@@ -373,43 +354,25 @@ function updateCartUI() {
     
     updatePromoTimer();
     
-    // 2. Simpan kembali ke storage setelah perubahan qty (opsional)
     localStorage.setItem('indraa_cart', JSON.stringify(cart));
 }
 
-// Fungsi yang dipanggil oleh tombol "Ya, Hapus"
 function executeDeleteItem() {
     if (itemIndexToDelete !== null) {
-        // Hapus item dari array
         cart.splice(itemIndexToDelete, 1);
-        
-        // Simpan ke storage dan update UI
         saveAndSync();
         
-        // Tutup Modal
         closeConfirmClear();
         itemIndexToDelete = null;
     }
 }
 
 function removeFromCart(index) {
-    // 1. Ambil data terbaru dari storage
     let currentCart = JSON.parse(localStorage.getItem('indraa_cart')) || [];
-    
-    // 2. Hapus item dari array berdasarkan index
     currentCart.splice(index, 1);
-    
-    // 3. Simpan kembali ke localStorage
     localStorage.setItem('indraa_cart', JSON.stringify(currentCart));
-    
-    // 4. Update variabel global agar sinkron dengan UI
     cart = currentCart;
-    
-    // 5. Jalankan update tampilan
     updateCartUI();
-
-    // 6. TUTUP MODAL (Jika Anda menggunakan modal konfirmasi)
-    // Sesuaikan ID 'confirmModal' dengan ID modal hapus Anda
     const modalHapus = document.getElementById('confirmModal'); 
     if (modalHapus) {
         modalHapus.style.display = 'none';
@@ -441,19 +404,10 @@ function closeConfirmClear() {
 }
 
 function executeClearCart() {
-    // Kosongkan array cart
     cart = [];
-    
-    // Hapus dari LocalStorage
     localStorage.removeItem('indraa_cart');
-    
-    // Update tampilan
     updateCartUI();
-    
-    // Tutup Modal
     closeConfirmClear();
-    
-    // Opsional: Notifikasi singkat
     console.log("Keranjang telah dikosongkan");
 }
 
@@ -598,7 +552,7 @@ function loadUserHistory(email) {
             
             snapshot.forEach((child) => {
                 const order = child.val();
-                if(order.status === "Selesai") orderCount++; // Hitung pesanan selesai
+                if(order.status === "Selesai") orderCount++;
 
                 const date = new Date(order.createdAt).toLocaleDateString('id-ID', {
                     day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'

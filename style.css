@@ -10,7 +10,7 @@
 body { 
     background-color: var(--bg); 
     color: var(--text-main); 
-    overflow-x: hidden; /* Ubah dari overflow: hidden agar bisa scroll ke bawah */
+    overflow-x: hidden;
     min-height: 100vh; 
 }
 
@@ -23,7 +23,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 .nav-links a { text-decoration: none; color: var(--text-dim); font-weight: 600; font-size: 14px; transition: 0.3s; }
 .btn-nav { background: var(--primary); color: #000 !important; padding: 8px 20px; border-radius: 50px; font-weight: 700; }
 
-/* MODIFIKASI: Hero dengan Background Biru Cahaya */
 .hero { 
     height: 100vh; 
     display: flex; 
@@ -44,7 +43,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 
 .hero-content { position: relative; z-index: 2; text-align: center; max-width: 800px; padding: 0 20px; margin-top: 60px; }
 
-/* MODIFIKASI: Text Utama dengan Efek Silau Berjalan */
 .hero h1 { 
     font-size: clamp(2.5rem, 8vw, 4.5rem); 
     font-weight: 800; 
@@ -72,7 +70,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 
 .hero p { margin-bottom: 40px; color: var(--text-dim); font-size: 1.1rem; line-height: 1.6; }
 
-/* MODAL & UI COMPONENTS */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 2000; padding: 20px; }
 .modal-content { background: #0f172a; margin: 5vh auto; border-radius: 30px; position: relative; border: 1px solid rgba(255,255,255,0.1); animation: slideUp 0.4s ease; }
 .promo-card { max-width: 400px; padding: 40px; text-align: center; }
@@ -92,13 +89,12 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 .price { display: block; color: #4ade80; font-size: 1.3rem; font-weight: 800; margin: 15px 0; }
 .btn-primary { background: var(--primary); color: #000; padding: 14px 32px; border: none; border-radius: 12px; font-weight: 700; text-decoration: none; cursor: pointer; }
 
-/* Membuat area Live Stock lebih luas ke bawah */
 .stok-iframe-container {
     width: 100%;
-    height: 75vh; /* Menggunakan 75% dari tinggi layar */
+    height: 75vh;
     border-radius: 15px;
     overflow: hidden;
-    background: #fff; /* Memberikan background putih agar teks di dalam iframe jelas */
+    background: #fff;
 }
 
 .stok-iframe-container iframe {
@@ -111,7 +107,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 .cart-item h5 { font-size: 14px; margin: 0; }
 .cart-item span { color: #4ade80; font-weight: 700; }
 
-/* ANIMASI */
 @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .fade-in {
@@ -132,12 +127,10 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     to { background: rgba(2, 6, 23, 0.4); }
 }
 
-/* Animasi Silau Berjalan */
 @keyframes shine {
     to { background-position: 200% center; }
 }
 
-/* Styling Footer */
 .footer {
     background: #0f172a;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -212,7 +205,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     font-size: 0.8rem;
 }
 
-/* Responsif untuk Footer */
 @media (max-width: 768px) {
     .footer-container {
         grid-template-columns: 1fr;
@@ -223,7 +215,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     }
 }
 
-/* Music Control Floating Button */
 .music-btn {
     position: fixed;
     bottom: 30px;
@@ -256,7 +247,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 
 #music-icon { font-size: 18px; }
 
-/* Styling Testimoni & Upload */
 .testimonials span { color: var(--primary); }
 
 .upload-box {
@@ -298,7 +288,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Styling untuk Zoom Foto Testimoni */
 .fullscreen-overlay {
     display: none;
     position: fixed;
@@ -326,9 +315,8 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     display: flex;
 }
 
-/* Styling Modal Auth & Riwayat */
 #authModal .modal-content {
-    max-width: 400px; /* Ukuran form login yang ideal */
+    max-width: 400px;
     background: linear-gradient(145deg, #1e293b, #0f172a);
     border: 1px solid rgba(56, 189, 248, 0.3);
     padding: 30px;
@@ -365,7 +353,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     background: rgba(15, 23, 42, 0.8);
 }
 
-/* List Riwayat Pesanan */
 .history-item {
     background: rgba(255, 255, 255, 0.03);
     padding: 15px;
@@ -404,7 +391,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     border: 1px solid var(--primary);
 }
 
-/* Tombol Logout Khusus */
 .btn-logout {
     width: 100%;
     padding: 12px;
@@ -424,9 +410,8 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
 }
 
-/* Mengubah teks tombol login di navigasi menjadi putih */
 #auth-section .btn-primary {
-    color: #ffffff !important; /* Warna putih murni */
+    color: #ffffff !important;
     font-weight: 600;
     text-decoration: none;
     display: flex;
@@ -444,7 +429,7 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 #btn-checkout-final {
     pointer-events: auto !important;
     position: relative;
-    z-index: 10001 !important; /* Angka sangat tinggi agar di depan semua elemen */
+    z-index: 10001 !important;
     background: var(--primary);
     border: none;
     border-radius: 12px;
@@ -454,10 +439,7 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
 }
 
-/* --- RESPONSIVE DESIGN FOR SMARTPHONES --- */
-
 @media (max-width: 768px) {
-    /* Tombol Garis Tiga */
     .menu-toggle {
         display: block;
         cursor: pointer;
@@ -474,15 +456,14 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
         background: var(--text-main);
     }
 
-    /* Transformasi Menu menjadi Sidebar/Overlay */
     .nav-links {
         position: fixed;
-        right: -100%; /* Sembunyi di luar layar kanan */
+        right: -100%;
         top: 0;
-        width: 280px; /* Lebar menu samping */
+        width: 280px;
         height: 100vh;
-        background: #0f172a; /* Warna gelap solid */
-        display: flex !important; /* Gunakan flex untuk menyusun list */
+        background: #0f172a;
+        display: flex !important;
         flex-direction: column;
         padding: 100px 20px 20px 20px;
         transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -492,18 +473,18 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     }
 
     .nav-links.active {
-        right: 0; /* Muncul ke layar */
+        right: 0;
     }
 
     .nav-links li {
         margin: 15px 0 !important;
         width: 100%;
-        display: block !important; /* Munculkan kembali yang disembunyikan */
+        display: block !important;
     }
 
     .nav-links a {
         font-size: 18px;
-        color: #ffffff !important; /* Pastikan teks putih */
+        color: #ffffff !important;
         display: block;
         padding: 10px;
         border-radius: 8px;
@@ -515,7 +496,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
         justify-content: flex-start;
     }
 
-    /* Animasi Tombol X saat diklik */
     #mobile-menu.is-active .bar:nth-child(2) { opacity: 0; }
     #mobile-menu.is-active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
     #mobile-menu.is-active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
@@ -525,13 +505,12 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
         font-size: 20px;
     }
 
-    /* 2. Hero Section */
     .hero {
-        height: 80vh; /* Sedikit lebih pendek di hp */
+        height: 80vh;
     }
 
     .hero h1 {
-        font-size: 2.5rem; /* Ukuran teks judul lebih kecil */
+        font-size: 2.5rem;
         margin-bottom: 15px;
     }
 
@@ -540,7 +519,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
         padding: 0 10px;
     }
 
-    /* 3. Modal & Pop-up */
     .modal {
         padding: 10px;
     }
@@ -563,9 +541,8 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
         font-size: 32px;
     }
 
-    /* 4. Grid Produk (Joki/Fruit) */
     .product-grid {
-        grid-template-columns: repeat(2, 1fr); /* Tampilan 2 kolom di HP */
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
 
@@ -584,15 +561,13 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     .btn-primary {
         padding: 10px 20px;
         font-size: 13px;
-        width: 100%; /* Tombol memenuhi lebar kartu */
+        width: 100%;
     }
 
-    /* 5. Live Stock Iframe */
     .stok-iframe-container {
         height: 60vh;
     }
 
-    /* 6. Tabs Kategori */
     .category-tabs {
         gap: 5px;
     }
@@ -602,7 +577,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
         font-size: 11px;
     }
 
-    /* 7. Music Button */
     .music-btn {
         bottom: 20px;
         right: 20px;
@@ -611,14 +585,13 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     }
 
     #music-text {
-        display: none; /* Sembunyikan teks, sisakan ikon saja di HP */
+        display: none;
     }
 }
 
-/* Extra Small Devices (HP Kecil) */
 @media (max-width: 400px) {
     .product-grid {
-        grid-template-columns: 1fr; /* 1 kolom jika layar sangat sempit */
+        grid-template-columns: 1fr;
     }
     
     .hero h1 {
@@ -627,21 +600,18 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 }
 
 @media (max-width: 768px) {
-    /* Pastikan Container Navigasi tidak membatasi klik */
     nav {
         background: rgba(2, 6, 23, 0.95) !important;
     }
 
-    /* Tombol Hamburger harus di depan overlay */
     .menu-toggle {
         display: flex !important;
         flex-direction: column;
         cursor: pointer;
-        z-index: 10002 !important; /* Lebih tinggi dari overlay dan nav-links */
+        z-index: 10002 !important;
         position: relative;
     }
 
-    /* Menu Samping */
     .nav-links {
         position: fixed !important;
         top: 0 !important;
@@ -653,9 +623,9 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
         align-items: flex-start !important;
         padding: 100px 30px !important;
         transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        z-index: 10001 !important; /* Di bawah tombol hamburger */
+        z-index: 10001 !important;
         box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-        visibility: hidden; /* Sembunyikan total saat tidak aktif */
+        visibility: hidden;
     }
 
     .nav-links.active {
@@ -670,7 +640,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     }
 }
 
-/* Membuat tombol X tetap di atas, berbentuk bulat, dan lebih terang */
 #packageModal .close-btn {
     position: sticky;
     top: 10px;
@@ -678,40 +647,36 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     float: right;
     z-index: 9999;
     
-    /* Membuat background bulat */
-    background: rgba(30, 41, 59, 0.9); /* Warna card-bg dengan sedikit transparan */
+    background: rgba(30, 41, 59, 0.9);
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%; /* Membuat jadi bulat sempurna */
+    border-radius: 50%;
     
-    /* Membuat tulisan X lebih terang dan jelas */
-    color: #ffffff; /* Putih terang */
+    color: #ffffff;
     font-size: 24px;
     font-weight: bold;
-    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); /* Efek cahaya biru tipis */
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
     
     cursor: pointer;
     transition: 0.3s;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Efek saat tombol disentuh (hover) */
 #packageModal .close-btn:hover {
     background: var(--primary);
     color: #000;
     transform: scale(1.1);
 }
 
-/* Custom Modal khusus untuk Cancel/Delete */
 .modal-cancel {
     display: none; 
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.85); /* Background lebih gelap */
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(10px);
     z-index: 9999;
     justify-content: center;
@@ -719,8 +684,8 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 }
 
 .cancel-card {
-    background: #111827; /* Warna gelap berbeda dari card-bg standar */
-    border: 1px solid rgba(239, 68, 68, 0.3); /* Border merah tipis */
+    background: #111827;
+    border: 1px solid rgba(239, 68, 68, 0.3);
     padding: 30px;
     border-radius: 20px;
     max-width: 350px;
@@ -765,7 +730,6 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
     width: 100%;
 }
 
-/* Fitur Quantity */
 .qty-control {
     display: flex;
     align-items: center;
@@ -808,25 +772,23 @@ nav { position: fixed; width: 100%; padding: 20px 0; z-index: 1000; background: 
 input:checked + .slider { background-color: #38bdf8; }
 input:checked + .slider:before { transform: translateX(16px); }
 
-/* Style Khusus Modal Toko Tutup */
 #closedModal {
     display: none;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(8px); /* Efek blur latar belakang */
-    background: rgba(2, 6, 23, 0.85); /* Warna gelap transparan */
+    backdrop-filter: blur(8px);
+    background: rgba(2, 6, 23, 0.85);
 }
 
 #closedModal .modal-content {
     background: linear-gradient(145deg, #1e293b, #0f172a);
-    border: 1px solid rgba(239, 68, 68, 0.3); /* Border kemerahan tipis */
+    border: 1px solid rgba(239, 68, 68, 0.3);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     border-radius: 24px;
     position: relative;
     overflow: hidden;
 }
 
-/* Dekorasi cahaya di pojok modal */
 #closedModal .modal-content::before {
     content: '';
     position: absolute;
@@ -852,7 +814,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 }
 
 #closedModal .btn-primary {
-    background: #ef4444; /* Warna merah agar kontras dengan 'Tutup' */
+    background: #ef4444;
     color: white;
     box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
 }
