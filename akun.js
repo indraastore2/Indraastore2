@@ -60,6 +60,10 @@ function uploadAccount() {
         const sword = document.getElementById('accSword').value.trim() || "-";
         const price = document.getElementById('accPrice').value.trim();
         const image = document.getElementById('accImage').value.trim();
+        
+        // Ambil input baru
+        const gamepass = document.getElementById('accGamepass').value.trim() || "-";
+        const perm = document.getElementById('accPerm').value.trim() || "-";
 
         if (!name || !price || !image) {
             alert("❌ Harap isi Nama, Harga, dan Link Foto!");
@@ -67,7 +71,6 @@ function uploadAccount() {
         }
 
         const btn = document.querySelector("#adminModal .btn-primary") || document.querySelector("#adminPanel .btn-primary");
-        
         if (btn) {
             btn.innerText = "⏳ Memproses...";
             btn.disabled = true;
@@ -77,6 +80,7 @@ function uploadAccount() {
         newPostRef.set({
             id: "BF-" + Math.floor(1000 + Math.random() * 9000),
             name, level, fruit, sword, price, image,
+            gamepass, perm, // Simpan ke database
             createdAt: Date.now()
         })
         .then(() => {
@@ -125,6 +129,14 @@ function loadMarketData() {
                             <span class="spec-item">Lv ${acc.level}</span>
                             <span class="spec-item">${acc.fruit}</span>
                             <span class="spec-item">${acc.sword}</span>
+                            
+                            ${acc.gamepass && acc.gamepass !== "-" ? `
+                                <span class="spec-item" style="border: 1px solid #fbbf24; color: #fbbf24;">🎫 ${acc.gamepass}</span>
+                            ` : ''}
+                            
+                            ${acc.perm && acc.perm !== "-" ? `
+                                <span class="spec-item" style="border: 1px solid #f472b6; color: #f472b6;">💎 ${acc.perm}</span>
+                            ` : ''}
                         </div>
                         <div class="price-row">
                             <div class="acc-price">${acc.price}</div>
@@ -174,11 +186,9 @@ function addToCart(id, name, price) {
     
     alert(`✅ ${name} berhasil masuk ke keranjang!`);
     
-    if (typeof updateCartBadge === "function") {
-        updateCartBadge();
-    } else if (typeof updateCartUI === "function") {
-        updateCartUI();
-    }
+    if (typeof updateCartBadge === "function") updateCartBadge();
+    if (typeof renderCart === "function") renderCart();
+    if (typeof openCart === "function") openCart(); 
 }
 
 function updateCartBadge() {
