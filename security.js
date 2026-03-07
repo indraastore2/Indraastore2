@@ -1,4 +1,3 @@
-// 1. Memblokir Klik Kanan, F12, dan Shortcut Inspect
 document.addEventListener('contextmenu', e => e.preventDefault());
 
 document.onkeydown = function(e) {
@@ -11,21 +10,12 @@ document.onkeydown = function(e) {
     }
 };
 
-// 2. Fitur Anti-Debugger (Blokir Developer Tools)
-// Jika user membuka DevTools, script ini akan memicu "pause" otomatis yang membuat website tidak bisa digunakan
 (function() {
-    var counter = 0;
     setInterval(function() {
-        (function(a) {
-            return (function(a) {
-                return (Function('Function(arguments[0]+"' + a + '")()'))
-            })(a)
-        })('debugger')('stateObject');
-        counter++;
+        Function('debugger')();
     }, 50);
 })();
 
-// 3. Deteksi Jika DevTools Terbuka (Mengalihkan Halaman)
 const devtools = {
     isOpen: false,
     orientation: undefined
@@ -37,7 +27,6 @@ setInterval(() => {
     
     if (widthThreshold || heightThreshold) {
         if (!devtools.isOpen) {
-            // Jika terdeteksi DevTools terbuka, arahkan ke halaman lain atau refresh
             window.location.reload(); 
         }
         devtools.isOpen = true;
@@ -46,6 +35,5 @@ setInterval(() => {
     }
 }, 500);
 
-// 4. Pesan Peringatan di Console
 console.log("%cSTOP!", "color: red; font-size: 50px; font-weight: bold;");
 console.log("%cFitur ini dilindungi oleh sistem keamanan Indraa Store.", "font-size: 18px; color: yellow;");
