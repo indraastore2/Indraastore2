@@ -697,7 +697,6 @@ document.getElementById('btn-klaim').onclick = function() {
     
     localStorage.setItem('modalClosed', 'true');
     
-    updateCartUI();
     const toast = document.getElementById("promoToast");
 toast.classList.add("show");
 
@@ -1077,3 +1076,4 @@ if(logoEl) {
 
     init();
 })();
+
