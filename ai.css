@@ -163,10 +163,11 @@ body {
 }
 
 .indra-text {
-    font-size: 16px;
-    font-weight: 400;
+    font-size: 18px;
+    font-weight: 500;
     color: var(--primary);
     letter-spacing: 2px;
+    margin-top: 6px;
 }
 
 .welcome-hidden {
