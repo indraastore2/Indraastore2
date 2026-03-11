@@ -127,6 +127,8 @@ const jokiData = [
     { name: "Pale Scraf", price: "Rp 10k", tag: "Wajib Sea 3", cat: "Accessories", val: 10000 },
     { name: "Muskeeter Hat", price: "Rp 10k", tag: "Wajib Level 1800+", cat: "Accessories", val: 10000 },
     { name: "Pilot Helmet", price: "Rp 5k", tag: "Wajib Sea 3", cat: "Accessories", val: 5000 },
+    { name: "1x Dungeon Easy", price: "Rp 5k", tag: "Dungeon", cat: "Dungeon", val: 5000 },
+    { name: "1x Dungeon Hard", price: "Rp 10k", tag: "Dungeon", cat: "Dungeon", val: 10000 },
 ];
 
 const fruitData = [
@@ -1003,3 +1005,4 @@ if(logoEl) {
     });
 
 }
+
