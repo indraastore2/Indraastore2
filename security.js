@@ -5,10 +5,6 @@
         window.location.replace(warningPage);
     };
 
-    const setupListeners = () => {
-        // Blokir Klik Kanan
-        document.addEventListener('contextmenu', e => e.preventDefault());
-
         // Blokir F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
         document.addEventListener('keydown', e => {
             if (
@@ -24,7 +20,6 @@
 
     // Jalankan pengecekan secara rutin
     const init = () => {
-        setupListeners();
         setInterval(() => {
         }, 2000);
     };
