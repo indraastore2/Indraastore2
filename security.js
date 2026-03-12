@@ -5,26 +5,6 @@
         window.location.replace(warningPage);
     };
 
-    const detectSize = () => {
-        const threshold = 160;
-        const widthDiff = window.outerWidth - window.innerWidth > threshold;
-        const heightDiff = window.outerHeight - window.innerHeight > threshold;
-        
-        if (widthDiff || heightDiff) {
-            triggerAction();
-        }
-    };
-
-    // Deteksi Eruda
-    const erudaCheck = () => {
-        const hasErudaObj = !!window.eruda;
-        const hasErudaDom = !!document.getElementById('eruda') || !!document.querySelector('[class*="eruda"]');
-        
-        if (hasErudaObj || hasErudaDom) {
-            triggerAction();
-        }
-    };
-
     const setupListeners = () => {
         // Blokir Klik Kanan
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -46,8 +26,6 @@
     const init = () => {
         setupListeners();
         setInterval(() => {
-            detectSize();
-            erudaCheck();
         }, 2000);
     };
 
