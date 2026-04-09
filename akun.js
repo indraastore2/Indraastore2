@@ -60,10 +60,10 @@ function uploadAccount() {
         const sword = document.getElementById('accSword').value.trim() || "-";
         const price = document.getElementById('accPrice').value.trim();
         const image = document.getElementById('accImage').value.trim();
-        
-        // Ambil input baru
         const gamepass = document.getElementById('accGamepass').value.trim() || "-";
         const perm = document.getElementById('accPerm').value.trim() || "-";
+        // Di bawah ini variabel menggunakan huruf kecil 'v'
+        const descvalue = document.getElementById('accDesc').value.trim() || "";
 
         if (!name || !price || !image) {
             alert("❌ Harap isi Nama, Harga, dan Link Foto!");
@@ -81,6 +81,7 @@ function uploadAccount() {
             id: "BF-" + Math.floor(1000 + Math.random() * 9000),
             name, level, fruit, sword, price, image,
             gamepass, perm, // Simpan ke database
+            desc: descvalue, // PERBAIKAN: Huruf kecil 'v' agar sesuai dengan variabel di atas
             createdAt: Date.now()
         })
         .then(() => {
@@ -115,39 +116,40 @@ function loadMarketData() {
 
         let html = "";
         Object.keys(data).forEach(key => {
-            const acc = data[key];
-            html += `
-                <div class="account-card">
-                    <div class="account-banner">
-                        <span class="status-badge">READY STOCK</span>
-                        ${isAdmin ? `<button onclick="deleteAcc('${key}')" class="btn-delete">✕ Hapus</button>` : ''}
-                        <img src="${acc.image}" onerror="this.src='https://via.placeholder.com/400x250?text=Gambar+Error'" alt="thumb">
-                    </div>
-                    <div class="account-details">
-                        <div class="account-title">${acc.name}</div>
-                        <div class="specs-list">
-                            <span class="spec-item">Lv ${acc.level}</span>
-                            <span class="spec-item">${acc.fruit}</span>
-                            <span class="spec-item">${acc.sword}</span>
-                            
-                            ${acc.gamepass && acc.gamepass !== "-" ? `
-                                <span class="spec-item" style="border: 1px solid #fbbf24; color: #fbbf24;">🎫 ${acc.gamepass}</span>
-                            ` : ''}
-                            
-                            ${acc.perm && acc.perm !== "-" ? `
-                                <span class="spec-item" style="border: 1px solid #f472b6; color: #f472b6;">💎 ${acc.perm}</span>
-                            ` : ''}
-                        </div>
-                        <div class="price-row">
-                            <div class="acc-price">${acc.price}</div>
-                            <button class="btn-primary" onclick="addToCart('${acc.id}', '${acc.name}', '${acc.price}')" style="padding: 10px 20px;">
-                                🛒 + Keranjang
-                            </button>
-                        </div>
-                    </div>
+    const acc = data[key];
+    html += `
+        <div class="account-card">
+            <div class="account-banner">
+                <span class="status-badge">READY STOCK</span>
+                ${isAdmin ? `<button onclick="deleteAcc('${key}')" class="btn-delete">✕ Hapus</button>` : ''}
+                <img src="${acc.image}" onerror="this.src='https://via.placeholder.com/400x250?text=Gambar+Error'" alt="thumb">
+            </div>
+            <div class="account-details">
+                <div class="account-title">${acc.name}</div>
+                <div class="specs-list">
+                    <span class="spec-item">Lv ${acc.level}</span>
+                    <span class="spec-item">${acc.fruit}</span>
+                    <span class="spec-item">${acc.sword}</span>
+                    ${acc.gamepass && acc.gamepass !== "-" ? `<span class="spec-item" style="border:1px solid #fbbf24; color:#fbbf24;">🎫 ${acc.gamepass}</span>` : ''}
+                    ${acc.perm && acc.perm !== "-" ? `<span class="spec-item" style="border:1px solid #f472b6; color:#f472b6;">💎 ${acc.perm}</span>` : ''}
                 </div>
-            `;
-        });
+
+                ${acc.desc ? `
+                    <div class="account-desc" style="font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; margin-bottom: 15px; border-left: 2px solid var(--primary); line-height: 1.4;">
+                        ${acc.desc.replace(/\n/g, '<br>')}
+                    </div>
+                ` : ''}
+
+                <div class="price-row">
+                    <div class="acc-price">${acc.price}</div>
+                    <button class="btn-primary" onclick="addToCart('${acc.id}', '${acc.name}', '${acc.price}')" style="padding: 10px 20px;">
+                        🛒 + Keranjang
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+});
         grid.innerHTML = html;
     });
 }
